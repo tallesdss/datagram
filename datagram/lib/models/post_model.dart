@@ -1,6 +1,6 @@
 import 'user_model.dart';
 
-class Post {
+class PostModel {
   final String id;
   final String userId;
   final String imageUrl;
@@ -11,9 +11,9 @@ class Post {
   final int commentsCount;
   final bool isLiked;
   final bool isSaved;
-  final User user;
+  final UserModel user;
 
-  const Post({
+  const PostModel({
     required this.id,
     required this.userId,
     required this.imageUrl,
@@ -27,7 +27,7 @@ class Post {
     required this.user,
   });
 
-  Post copyWith({
+  PostModel copyWith({
     String? id,
     String? userId,
     String? imageUrl,
@@ -38,9 +38,9 @@ class Post {
     int? commentsCount,
     bool? isLiked,
     bool? isSaved,
-    User? user,
+    UserModel? user,
   }) {
-    return Post(
+    return PostModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       imageUrl: imageUrl ?? this.imageUrl,
@@ -58,7 +58,7 @@ class Post {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Post && other.id == id;
+    return other is PostModel && other.id == id;
   }
 
   @override
@@ -66,6 +66,50 @@ class Post {
 
   @override
   String toString() {
-    return 'Post(id: $id, userId: $userId, caption: $caption)';
+    return 'PostModel(id: $id, userId: $userId, caption: $caption)';
+  }
+  
+  /// Criar modelo a partir de JSON
+  factory PostModel.fromJson(Map<String, dynamic> json) {
+    return PostModel(
+      id: json['id'] ?? '',
+      userId: json['user_id'] ?? '',
+      imageUrl: json['image_url'] ?? '',
+      caption: json['caption'] ?? '',
+      location: json['location'],
+      timestamp: json['created_at'] != null 
+          ? DateTime.parse(json['created_at']) 
+          : DateTime.now(),
+      likesCount: json['likes_count'] ?? 0,
+      commentsCount: json['comments_count'] ?? 0,
+      isLiked: json['is_liked'] ?? false,
+      isSaved: json['is_saved'] ?? false,
+      user: json['user'] != null 
+          ? UserModel.fromJson(json['user']) 
+          : UserModel(
+              id: json['user_id'] ?? '',
+              username: '',
+              fullName: '',
+              profileImageUrl: '',
+              bio: '',
+              postsCount: 0,
+              followersCount: 0,
+              followingCount: 0,
+            ),
+    );
+  }
+  
+  /// Converter modelo para JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'image_url': imageUrl,
+      'caption': caption,
+      'location': location,
+      'created_at': timestamp.toIso8601String(),
+      'likes_count': likesCount,
+      'comments_count': commentsCount,
+    };
   }
 }

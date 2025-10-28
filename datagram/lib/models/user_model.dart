@@ -1,4 +1,4 @@
-class User {
+class UserModel {
   final String id;
   final String username;
   final String fullName;
@@ -11,7 +11,7 @@ class User {
   final bool isPrivate;
   final bool isFollowing;
 
-  const User({
+  const UserModel({
     required this.id,
     required this.username,
     required this.fullName,
@@ -25,7 +25,7 @@ class User {
     this.isFollowing = false,
   });
 
-  User copyWith({
+  UserModel copyWith({
     String? id,
     String? username,
     String? fullName,
@@ -38,7 +38,7 @@ class User {
     bool? isPrivate,
     bool? isFollowing,
   }) {
-    return User(
+    return UserModel(
       id: id ?? this.id,
       username: username ?? this.username,
       fullName: fullName ?? this.fullName,
@@ -56,7 +56,7 @@ class User {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is User && other.id == id;
+    return other is UserModel && other.id == id;
   }
 
   @override
@@ -64,6 +64,39 @@ class User {
 
   @override
   String toString() {
-    return 'User(id: $id, username: $username, fullName: $fullName)';
+    return 'UserModel(id: $id, username: $username, fullName: $fullName)';
+  }
+  
+  /// Criar modelo a partir de JSON
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'] ?? '',
+      username: json['username'] ?? '',
+      fullName: json['full_name'] ?? '',
+      profileImageUrl: json['profile_image_url'] ?? '',
+      bio: json['bio'] ?? '',
+      postsCount: json['posts_count'] ?? 0,
+      followersCount: json['followers_count'] ?? 0,
+      followingCount: json['following_count'] ?? 0,
+      isVerified: json['is_verified'] ?? false,
+      isPrivate: json['is_private'] ?? false,
+      isFollowing: false, // Será calculado separadamente
+    );
+  }
+  
+  /// Converter modelo para JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'full_name': fullName,
+      'profile_image_url': profileImageUrl,
+      'bio': bio,
+      'posts_count': postsCount,
+      'followers_count': followersCount,
+      'following_count': followingCount,
+      'is_verified': isVerified,
+      'is_private': isPrivate,
+    };
   }
 }
