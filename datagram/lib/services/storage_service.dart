@@ -122,7 +122,7 @@ class StorageService {
     final fullPath = '$userId/$fileName';
     
     // Upload dos bytes
-    await _client.storage.from(bucket).upload(
+    await _client.storage.from(bucket).uploadBinary(
       fullPath,
       bytes,
       fileOptions: FileOptions(

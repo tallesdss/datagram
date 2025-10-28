@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:io';
 import 'dart:typed_data';
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
