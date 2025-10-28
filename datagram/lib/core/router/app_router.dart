@@ -14,13 +14,60 @@ import '../../screens/story/create_story_screen.dart';
 import '../../screens/settings/settings_screen.dart';
 import '../../screens/saved/saved_posts_screen.dart';
 import '../../screens/messages/direct_messages_screen.dart';
+import '../../screens/auth/login_screen.dart';
+import '../../screens/auth/register_screen.dart';
+import '../../screens/auth/forgot_password_screen.dart';
+import '../../screens/auth/onboarding_screen.dart';
 import '../../providers/providers.dart';
 
 // Provider para o router
 final routerProvider = Provider<GoRouter>((ref) {
+  // Observar o estado de autenticação para redirecionamento
+  final authState = ref.watch(authProvider);
+  
   return GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/onboarding',
+    redirect: (context, state) {
+      // Verificar se o usuário está autenticado
+      final isAuth = authState.isAuthenticated;
+      final isAuthRoute = state.matchedLocation == '/login' || 
+                          state.matchedLocation == '/register' || 
+                          state.matchedLocation == '/forgot-password' ||
+                          state.matchedLocation == '/onboarding';
+      
+      // Se não estiver autenticado e não estiver em uma rota de autenticação,
+      // redirecionar para a tela de login
+      if (!isAuth && !isAuthRoute) {
+        return '/login';
+      }
+      
+      // Se estiver autenticado e estiver em uma rota de autenticação,
+      // redirecionar para a tela inicial
+      if (isAuth && isAuthRoute) {
+        return '/home';
+      }
+      
+      // Caso contrário, não redirecionar
+      return null;
+    },
     routes: [
+      // Rotas de autenticação
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
       // Rota principal com bottom navigation
       ShellRoute(
         builder: (context, state, child) {

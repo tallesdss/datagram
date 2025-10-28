@@ -3,6 +3,7 @@ export 'user_provider.dart';
 export 'post_provider.dart' hide sortedCommentsProvider, commentsByPostProvider;
 export 'story_provider.dart';
 export 'comment_provider.dart';
+export 'auth_provider.dart';
 
 // Providers principais para uso geral
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,10 +11,13 @@ import 'user_provider.dart';
 import 'post_provider.dart';
 import 'story_provider.dart';
 import 'comment_provider.dart';
+import 'auth_provider.dart';
 
 // Provider para o estado geral da aplicação
 final appStateProvider = Provider<Map<String, dynamic>>((ref) {
-  final currentUser = ref.watch(currentUserProvider);
+  // Usar o currentUserProvider do auth_provider.dart em vez do user_provider.dart
+  final authState = ref.watch(authProvider);
+  final currentUser = authState.userProfile;
   final postsCount = ref.watch(postsProvider).length;
   final storiesCount = ref.watch(storiesProvider).length;
   final commentsCount = ref.watch(commentsProvider).length;
@@ -23,7 +27,8 @@ final appStateProvider = Provider<Map<String, dynamic>>((ref) {
     'postsCount': postsCount,
     'storiesCount': storiesCount,
     'commentsCount': commentsCount,
-    'isLoading': false,
+    'isLoading': authState.isLoading,
+    'isAuthenticated': authState.isAuthenticated,
     'lastUpdated': DateTime.now(),
   };
 });
@@ -101,7 +106,8 @@ final generalStatsProvider = Provider<Map<String, int>>((ref) {
 final mainFeedProvider = Provider<Map<String, dynamic>>((ref) {
   final posts = ref.watch(sortedPostsProvider);
   final stories = ref.watch(sortedStoriesProvider);
-  final currentUser = ref.watch(currentUserProvider);
+  final authState = ref.watch(authProvider);
+  final currentUser = authState.userProfile;
   
   return {
     'posts': posts.take(20).toList(),
@@ -109,6 +115,7 @@ final mainFeedProvider = Provider<Map<String, dynamic>>((ref) {
     'currentUser': currentUser,
     'hasMorePosts': posts.length > 20,
     'hasMoreStories': stories.length > 10,
+    'isAuthenticated': authState.isAuthenticated,
   };
 });
 
