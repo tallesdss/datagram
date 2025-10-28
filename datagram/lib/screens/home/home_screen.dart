@@ -16,50 +16,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final stories = ref.watch(sortedStoriesProvider);
     final posts = ref.watch(sortedPostsProvider);
-    final unreadNotifications = ref.watch(unreadNotificationsProvider);
     
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Datagram'),
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.favorite_outline),
-                onPressed: () {},
-              ),
-              if (unreadNotifications > 0)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '$unreadNotifications',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.send_outlined),
-            onPressed: () {},
-          ),
-        ],
-      ),
       body: RefreshIndicator(
         onRefresh: () async {
           // Simular refresh - em uma implementação real, aqui chamaríamos os providers para recarregar os dados

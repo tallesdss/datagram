@@ -14,6 +14,7 @@ import '../../screens/story/create_story_screen.dart';
 import '../../screens/settings/settings_screen.dart';
 import '../../screens/saved/saved_posts_screen.dart';
 import '../../screens/messages/direct_messages_screen.dart';
+import '../../providers/providers.dart';
 
 // Provider para o router
 final routerProvider = Provider<GoRouter>((ref) {
@@ -170,18 +171,53 @@ class MainShell extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_outline),
-            onPressed: () {
-              context.push('/activity');
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.send_outlined),
-            onPressed: () {
-              context.push('/direct-messages');
-            },
-          ),
+            Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.favorite_outline),
+                  onPressed: () {
+                    context.push('/activity');
+                  },
+                ),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final unreadNotifications = ref.watch(unreadNotificationsProvider);
+                    if (unreadNotifications > 0) {
+                      return Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '$unreadNotifications',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ],
+            ),
+            IconButton(
+              icon: const Icon(Icons.send_outlined),
+              onPressed: () {
+                context.push('/direct-messages');
+              },
+            ),
         ],
       );
     }
