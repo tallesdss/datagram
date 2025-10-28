@@ -6,10 +6,14 @@ import '../../screens/search/search_screen.dart';
 import '../../screens/reels/reels_screen.dart';
 import '../../screens/activity/activity_screen.dart';
 import '../../screens/profile/profile_screen.dart';
+import '../../screens/profile/edit_profile_screen.dart';
 import '../../screens/post/post_detail_screen.dart';
 import '../../screens/post/create_post_screen.dart';
 import '../../screens/story/story_viewer_screen.dart';
 import '../../screens/story/create_story_screen.dart';
+import '../../screens/settings/settings_screen.dart';
+import '../../screens/saved/saved_posts_screen.dart';
+import '../../screens/messages/direct_messages_screen.dart';
 
 // Provider para o router
 final routerProvider = Provider<GoRouter>((ref) {
@@ -45,7 +49,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       
-      // Rotas modais
+      // Rotas de posts
       GoRoute(
         path: '/post/:postId',
         builder: (context, state) {
@@ -59,6 +63,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CreatePostScreen(),
       ),
       
+      // Rotas de stories
       GoRoute(
         path: '/create-story',
         builder: (context, state) => const CreateStoryScreen(),
@@ -70,6 +75,30 @@ final routerProvider = Provider<GoRouter>((ref) {
           final storyId = state.pathParameters['storyId']!;
           return StoryViewerScreen(storyId: storyId);
         },
+      ),
+      
+      // Rotas de perfil
+      GoRoute(
+        path: '/edit-profile',
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      
+      // Rotas de configurações
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      
+      // Rotas de salvos
+      GoRoute(
+        path: '/saved',
+        builder: (context, state) => const SavedPostsScreen(),
+      ),
+      
+      // Rotas de mensagens
+      GoRoute(
+        path: '/direct-messages',
+        builder: (context, state) => const DirectMessagesScreen(),
       ),
     ],
   );
@@ -84,6 +113,7 @@ class MainShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: _buildAppBar(context),
       body: child,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -120,6 +150,45 @@ class MainShell extends StatelessWidget {
     );
   }
 
+  // AppBar personalizada para cada tela
+  PreferredSizeWidget? _buildAppBar(BuildContext context) {
+    final location = GoRouterState.of(context).uri.path;
+    
+    // Não mostrar AppBar nas telas que já têm sua própria AppBar
+    if (location == '/profile' || 
+        location == '/search' || 
+        location == '/reels' || 
+        location == '/activity') {
+      return null;
+    }
+    
+    // AppBar da tela inicial
+    if (location == '/home') {
+      return AppBar(
+        title: const Text(
+          'Datagram',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite_outline),
+            onPressed: () {
+              context.push('/activity');
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.send_outlined),
+            onPressed: () {
+              context.push('/direct-messages');
+            },
+          ),
+        ],
+      );
+    }
+    
+    return null;
+  }
+
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
     switch (location) {
@@ -130,7 +199,7 @@ class MainShell extends StatelessWidget {
       case '/reels':
         return 3;
       case '/activity':
-        return 4;
+        return 0; // Atividade não tem tab própria
       case '/profile':
         return 4;
       default:
@@ -181,6 +250,28 @@ class MainShell extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 context.push('/create-story');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.video_call_outlined),
+              title: const Text('Criar Reel'),
+              onTap: () {
+                Navigator.pop(context);
+                // Simulação - na implementação real, isso levaria a uma tela de criação de reels
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Funcionalidade de Reels em desenvolvimento')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.article_outlined),
+              title: const Text('Criar Publicação'),
+              onTap: () {
+                Navigator.pop(context);
+                // Simulação - na implementação real, isso levaria a uma tela de criação de publicação
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Funcionalidade de Publicação em desenvolvimento')),
+                );
               },
             ),
           ],
