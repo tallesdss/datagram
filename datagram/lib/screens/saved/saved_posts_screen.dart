@@ -6,9 +6,9 @@ import '../../providers/providers.dart';
 import '../../models/post_model.dart';
 
 // Provider para posts salvos (simulado)
-final savedPostsProvider = Provider<List<Post>>((ref) {
-  final allPosts = ref.watch(postsProvider);
-  return allPosts.where((post) => post.isSaved).toList();
+final savedPostModelsProvider = Provider<List<PostModel>>((ref) {
+  final allPostModels = ref.watch(postsProvider);
+  return allPostModels.where((post) => post.isSaved).toList();
 });
 
 // Provider para coleções de posts salvos (simulado)
@@ -35,14 +35,14 @@ final savedCollectionsProvider = Provider<List<Map<String, dynamic>>>((ref) {
   ];
 });
 
-class SavedPostsScreen extends ConsumerStatefulWidget {
-  const SavedPostsScreen({super.key});
+class SavedPostModelsScreen extends ConsumerStatefulWidget {
+  const SavedPostModelsScreen({super.key});
 
   @override
-  ConsumerState<SavedPostsScreen> createState() => _SavedPostsScreenState();
+  ConsumerState<SavedPostModelsScreen> createState() => _SavedPostModelsScreenState();
 }
 
-class _SavedPostsScreenState extends ConsumerState<SavedPostsScreen> with SingleTickerProviderStateMixin {
+class _SavedPostModelsScreenState extends ConsumerState<SavedPostModelsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -59,7 +59,7 @@ class _SavedPostsScreenState extends ConsumerState<SavedPostsScreen> with Single
 
   @override
   Widget build(BuildContext context) {
-    final savedPosts = ref.watch(savedPostsProvider);
+    final savedPostModels = ref.watch(savedPostModelsProvider);
     final collections = ref.watch(savedCollectionsProvider);
 
     return Scaffold(
@@ -89,7 +89,7 @@ class _SavedPostsScreenState extends ConsumerState<SavedPostsScreen> with Single
         controller: _tabController,
         children: [
           // Aba de todos os posts salvos
-          savedPosts.isEmpty
+          savedPostModels.isEmpty
               ? _buildEmptyState('Nenhum post salvo', 'Salve posts para acessá-los mais tarde.')
               : GridView.builder(
                   padding: const EdgeInsets.all(2),
@@ -98,9 +98,9 @@ class _SavedPostsScreenState extends ConsumerState<SavedPostsScreen> with Single
                     crossAxisSpacing: 2,
                     mainAxisSpacing: 2,
                   ),
-                  itemCount: savedPosts.length,
+                  itemCount: savedPostModels.length,
                   itemBuilder: (context, index) {
-                    final post = savedPosts[index];
+                    final post = savedPostModels[index];
                     return GestureDetector(
                       onTap: () {
                         context.push('/post/${post.id}');
@@ -370,7 +370,7 @@ class _SavedPostsScreenState extends ConsumerState<SavedPostsScreen> with Single
 
   void _showCollectionDetails(BuildContext context, Map<String, dynamic> collection) {
     // Simular posts da coleção
-    final posts = ref.read(savedPostsProvider).take(collection['postsCount'] as int).toList();
+    final posts = ref.read(savedPostModelsProvider).take(collection['postsCount'] as int).toList();
 
     Navigator.push(
       context,
@@ -421,6 +421,23 @@ class _SavedPostsScreenState extends ConsumerState<SavedPostsScreen> with Single
                   },
                 ),
         ),
+      ),
+    );
+  }
+}
+
+class SavedPostsScreen extends ConsumerWidget {
+  const SavedPostsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Posts Salvos'),
+        centerTitle: true,
+      ),
+      body: const Center(
+        child: Text('Posts Salvos'),
       ),
     );
   }

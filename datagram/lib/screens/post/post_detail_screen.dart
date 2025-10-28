@@ -16,7 +16,7 @@ class PostDetailScreen extends ConsumerStatefulWidget {
 
 class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   final TextEditingController _commentController = TextEditingController();
-  bool _isPostingComment = false;
+  bool _isPostingCommentModel = false;
 
   @override
   void dispose() {
@@ -24,11 +24,11 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     super.dispose();
   }
 
-  void _postComment() {
+  void _postCommentModel() {
     if (_commentController.text.trim().isEmpty) return;
     
     setState(() {
-      _isPostingComment = true;
+      _isPostingCommentModel = true;
     });
     
     // Simular envio de comentário
@@ -36,7 +36,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
       if (!mounted) return;
       
       setState(() {
-        _isPostingComment = false;
+        _isPostingCommentModel = false;
         _commentController.clear();
       });
       
@@ -217,7 +217,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                 ),
                 
                 // Lista de comentários
-                ...comments.map((comment) => _buildCommentItem(context, comment)),
+                ...comments.map((comment) => _buildCommentModelItem(context, comment)),
               ],
             ),
           ),
@@ -253,7 +253,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                     maxLines: 1,
                   ),
                 ),
-                _isPostingComment
+                _isPostingCommentModel
                     ? const SizedBox(
                         width: 20,
                         height: 20,
@@ -262,7 +262,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                     : TextButton(
                         onPressed: _commentController.text.trim().isEmpty
                             ? null
-                            : _postComment,
+                            : _postCommentModel,
                         child: const Text('Publicar'),
                       ),
               ],
@@ -273,7 +273,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     );
   }
   
-  Widget _buildCommentItem(BuildContext context, Comment comment) {
+  Widget _buildCommentModelItem(BuildContext context, CommentModel comment) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(

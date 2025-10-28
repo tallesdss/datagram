@@ -4,49 +4,49 @@ import '../models/comment_model.dart';
 import '../data/mock_data.dart';
 
 // Provider para todos os posts
-final postsProvider = Provider<List<Post>>((ref) {
+final postsProvider = Provider<List<PostModel>>((ref) {
   return MockData.getPosts();
 });
 
 // Provider para posts ordenados por timestamp (mais recentes primeiro)
-final sortedPostsProvider = Provider<List<Post>>((ref) {
+final sortedPostsProvider = Provider<List<PostModel>>((ref) {
   final posts = ref.watch(postsProvider);
-  final sortedPosts = List<Post>.from(posts);
+  final sortedPosts = List<PostModel>.from(posts);
   sortedPosts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
   return sortedPosts;
 });
 
 // Provider para posts salvos pelo usuário atual
-final savedPostsProvider = Provider<List<Post>>((ref) {
+final savedPostsProvider = Provider<List<PostModel>>((ref) {
   final posts = ref.watch(postsProvider);
   return posts.where((post) => post.isSaved).toList();
 });
 
 // Provider para posts curtidos pelo usuário atual
-final likedPostsProvider = Provider<List<Post>>((ref) {
+final likedPostsProvider = Provider<List<PostModel>>((ref) {
   final posts = ref.watch(postsProvider);
   return posts.where((post) => post.isLiked).toList();
 });
 
 // Provider para posts de um usuário específico
-final postsByUserProvider = Provider.family<List<Post>, String>((ref, userId) {
-  return MockData.getPostsByUser(userId);
+final postsByUserProvider = Provider.family<List<PostModel>, String>((ref, userId) {
+  return MockData.getPostsByUserModel(userId);
 });
 
 // Provider para um post específico por ID
-final postByIdProvider = Provider.family<Post?, String>((ref, id) {
+final postByIdProvider = Provider.family<PostModel?, String>((ref, id) {
   return MockData.getPostById(id);
 });
 
 // Provider para comentários de um post específico
-final commentsByPostProvider = Provider.family<List<Comment>, String>((ref, postId) {
-  return MockData.getCommentsByPost(postId);
+final commentsByPostProvider = Provider.family<List<CommentModel>, String>((ref, postId) {
+  return MockData.getCommentsByPostModel(postId);
 });
 
 // Provider para comentários ordenados por timestamp
-final sortedCommentsProvider = Provider.family<List<Comment>, String>((ref, postId) {
+final sortedCommentsProvider = Provider.family<List<CommentModel>, String>((ref, postId) {
   final comments = ref.watch(commentsByPostProvider(postId));
-  final sortedComments = List<Comment>.from(comments);
+  final sortedComments = List<CommentModel>.from(comments);
   sortedComments.sort((a, b) => a.timestamp.compareTo(b.timestamp));
   return sortedComments;
 });
@@ -63,27 +63,27 @@ final postStatsProvider = Provider.family<Map<String, int>, String>((ref, postId
 });
 
 // Provider para verificar se um post está curtido
-final isPostLikedProvider = Provider.family<bool, String>((ref, postId) {
+final isPostModelLikedProvider = Provider.family<bool, String>((ref, postId) {
   final post = ref.watch(postByIdProvider(postId));
   return post?.isLiked ?? false;
 });
 
 // Provider para verificar se um post está salvo
-final isPostSavedProvider = Provider.family<bool, String>((ref, postId) {
+final isPostModelSavedProvider = Provider.family<bool, String>((ref, postId) {
   final post = ref.watch(postByIdProvider(postId));
   return post?.isSaved ?? false;
 });
 
 // Provider para posts com mais curtidas
-final topLikedPostsProvider = Provider<List<Post>>((ref) {
+final topLikedPostModelsProvider = Provider<List<PostModel>>((ref) {
   final posts = ref.watch(postsProvider);
-  final sortedPosts = List<Post>.from(posts);
-  sortedPosts.sort((a, b) => b.likesCount.compareTo(a.likesCount));
-  return sortedPosts.take(5).toList();
+  final sortedPostModels = List<PostModel>.from(posts);
+  sortedPostModels.sort((a, b) => b.likesCount.compareTo(a.likesCount));
+  return sortedPostModels.take(5).toList();
 });
 
 // Provider para posts recentes (últimas 24 horas)
-final recentPostsProvider = Provider<List<Post>>((ref) {
+final recentPostModelsProvider = Provider<List<PostModel>>((ref) {
   final posts = ref.watch(postsProvider);
   final now = DateTime.now();
   final yesterday = now.subtract(const Duration(days: 1));
@@ -92,26 +92,26 @@ final recentPostsProvider = Provider<List<Post>>((ref) {
 });
 
 // Provider para posts por localização
-final postsByLocationProvider = Provider.family<List<Post>, String>((ref, location) {
+final postsByLocationProvider = Provider.family<List<PostModel>, String>((ref, location) {
   final posts = ref.watch(postsProvider);
   return posts.where((post) => post.location?.contains(location) ?? false).toList();
 });
 
 // Provider para posts com hashtags específicas
-final postsByHashtagProvider = Provider.family<List<Post>, String>((ref, hashtag) {
+final postsByHashtagProvider = Provider.family<List<PostModel>, String>((ref, hashtag) {
   final posts = ref.watch(postsProvider);
   return posts.where((post) => post.caption.contains('#$hashtag')).toList();
 });
 
 // Provider para feed personalizado (posts dos usuários seguidos)
-final personalizedFeedProvider = Provider<List<Post>>((ref) {
+final personalizedFeedProvider = Provider<List<PostModel>>((ref) {
   // Este provider será conectado com o UserProvider quando integrarmos
   final posts = ref.watch(sortedPostsProvider);
   return posts.take(10).toList(); // Por enquanto, retorna os 10 posts mais recentes
 });
 
 // Provider para busca de posts
-final searchPostsProvider = Provider.family<List<Post>, String>((ref, query) {
+final searchPostsProvider = Provider.family<List<PostModel>, String>((ref, query) {
   final posts = ref.watch(postsProvider);
   if (query.isEmpty) return [];
   

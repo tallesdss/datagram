@@ -5,8 +5,8 @@ import '../models/comment_model.dart';
 
 class MockData {
   // Usuários mock
-  static final List<User> users = [
-    const User(
+  static final List<UserModel> users = [
+    const UserModel(
       id: 'current_user',
       username: 'usuario_atual',
       fullName: 'Usuário Atual',
@@ -17,7 +17,7 @@ class MockData {
       followingCount: 380,
       isVerified: true,
     ),
-    const User(
+    const UserModel(
       id: 'user_1',
       username: 'ana_silva',
       fullName: 'Ana Silva',
@@ -28,7 +28,7 @@ class MockData {
       followingCount: 420,
       isVerified: true,
     ),
-    const User(
+    const UserModel(
       id: 'user_2',
       username: 'carlos_dev',
       fullName: 'Carlos Santos',
@@ -38,7 +38,7 @@ class MockData {
       followersCount: 2100,
       followingCount: 650,
     ),
-    const User(
+    const UserModel(
       id: 'user_3',
       username: 'maria_fitness',
       fullName: 'Maria Oliveira',
@@ -49,7 +49,7 @@ class MockData {
       followingCount: 890,
       isVerified: true,
     ),
-    const User(
+    const UserModel(
       id: 'user_4',
       username: 'joao_travel',
       fullName: 'João Costa',
@@ -59,7 +59,7 @@ class MockData {
       followersCount: 3200,
       followingCount: 1200,
     ),
-    const User(
+    const UserModel(
       id: 'user_5',
       username: 'lucia_art',
       fullName: 'Lúcia Fernandes',
@@ -69,7 +69,7 @@ class MockData {
       followersCount: 4500,
       followingCount: 320,
     ),
-    const User(
+    const UserModel(
       id: 'user_6',
       username: 'pedro_food',
       fullName: 'Pedro Lima',
@@ -79,7 +79,7 @@ class MockData {
       followersCount: 7800,
       followingCount: 450,
     ),
-    const User(
+    const UserModel(
       id: 'user_7',
       username: 'sofia_music',
       fullName: 'Sofia Rodrigues',
@@ -90,7 +90,7 @@ class MockData {
       followingCount: 280,
       isVerified: true,
     ),
-    const User(
+    const UserModel(
       id: 'user_8',
       username: 'rafael_tech',
       fullName: 'Rafael Almeida',
@@ -100,7 +100,7 @@ class MockData {
       followersCount: 3400,
       followingCount: 520,
     ),
-    const User(
+    const UserModel(
       id: 'user_9',
       username: 'camila_design',
       fullName: 'Camila Barbosa',
@@ -110,7 +110,7 @@ class MockData {
       followersCount: 5600,
       followingCount: 380,
     ),
-    const User(
+    const UserModel(
       id: 'user_10',
       username: 'lucas_gamer',
       fullName: 'Lucas Pereira',
@@ -123,7 +123,7 @@ class MockData {
   ];
 
   // Método para obter usuário por ID
-  static User? getUserById(String id) {
+  static UserModel? getUserById(String id) {
     try {
       return users.firstWhere((user) => user.id == id);
     } catch (e) {
@@ -132,19 +132,19 @@ class MockData {
   }
 
   // Método para obter usuário atual
-  static User getCurrentUser() {
+  static UserModel getCurrentUserModel() {
     return getUserById('current_user') ?? users.first;
   }
 
   // Método para obter usuários aleatórios
-  static List<User> getRandomUsers({int count = 5}) {
-    final shuffled = List<User>.from(users)..shuffle();
+  static List<UserModel> getRandomUsers({int count = 5}) {
+    final shuffled = List<UserModel>.from(users)..shuffle();
     return shuffled.take(count).toList();
   }
 
   // Posts mock
-  static final List<Post> posts = [
-    Post(
+  static final List<PostModel> posts = [
+    PostModel(
       id: 'post_1',
       userId: 'ana_silva',
       imageUrl: 'https://picsum.photos/400/500?random=101',
@@ -157,7 +157,7 @@ class MockData {
       isSaved: false,
       user: users[1], // ana_silva
     ),
-    Post(
+    PostModel(
       id: 'post_2',
       userId: 'carlos_dev',
       imageUrl: 'https://picsum.photos/400/500?random=102',
@@ -170,7 +170,7 @@ class MockData {
       isSaved: true,
       user: users[2], // carlos_dev
     ),
-    Post(
+    PostModel(
       id: 'post_3',
       userId: 'maria_fitness',
       imageUrl: 'https://picsum.photos/400/500?random=103',
@@ -183,7 +183,7 @@ class MockData {
       isSaved: false,
       user: users[3], // maria_fitness
     ),
-    Post(
+    PostModel(
       id: 'post_4',
       userId: 'joao_travel',
       imageUrl: 'https://picsum.photos/400/500?random=104',
@@ -196,7 +196,7 @@ class MockData {
       isSaved: false,
       user: users[4], // joao_travel
     ),
-    Post(
+    PostModel(
       id: 'post_5',
       userId: 'lucia_art',
       imageUrl: 'https://picsum.photos/400/500?random=105',
@@ -209,7 +209,7 @@ class MockData {
       isSaved: true,
       user: users[5], // lucia_art
     ),
-    Post(
+    PostModel(
       id: 'post_6',
       userId: 'pedro_food',
       imageUrl: 'https://picsum.photos/400/500?random=106',
@@ -222,7 +222,7 @@ class MockData {
       isSaved: false,
       user: users[6], // pedro_food
     ),
-    Post(
+    PostModel(
       id: 'post_7',
       userId: 'sofia_music',
       imageUrl: 'https://picsum.photos/400/500?random=107',
@@ -235,7 +235,7 @@ class MockData {
       isSaved: true,
       user: users[7], // sofia_music
     ),
-    Post(
+    PostModel(
       id: 'post_8',
       userId: 'rafael_tech',
       imageUrl: 'https://picsum.photos/400/500?random=108',
@@ -248,7 +248,7 @@ class MockData {
       isSaved: false,
       user: users[8], // rafael_tech
     ),
-    Post(
+    PostModel(
       id: 'post_9',
       userId: 'camila_design',
       imageUrl: 'https://picsum.photos/400/500?random=109',
@@ -261,7 +261,7 @@ class MockData {
       isSaved: true,
       user: users[9], // camila_design
     ),
-    Post(
+    PostModel(
       id: 'post_10',
       userId: 'lucas_gamer',
       imageUrl: 'https://picsum.photos/400/500?random=110',
@@ -277,8 +277,8 @@ class MockData {
   ];
 
   // Stories mock
-  static final List<Story> stories = [
-    Story(
+  static final List<StoryModel> stories = [
+    StoryModel(
       id: 'story_1',
       userId: 'ana_silva',
       mediaUrl: 'https://picsum.photos/300/500?random=201',
@@ -287,7 +287,7 @@ class MockData {
       duration: const Duration(seconds: 5),
       user: users[1], // ana_silva
     ),
-    Story(
+    StoryModel(
       id: 'story_2',
       userId: 'carlos_dev',
       mediaUrl: 'https://picsum.photos/300/500?random=202',
@@ -296,7 +296,7 @@ class MockData {
       duration: const Duration(seconds: 3),
       user: users[2], // carlos_dev
     ),
-    Story(
+    StoryModel(
       id: 'story_3',
       userId: 'maria_fitness',
       mediaUrl: 'https://picsum.photos/300/500?random=203',
@@ -305,7 +305,7 @@ class MockData {
       duration: const Duration(seconds: 4),
       user: users[3], // maria_fitness
     ),
-    Story(
+    StoryModel(
       id: 'story_4',
       userId: 'joao_travel',
       mediaUrl: 'https://picsum.photos/300/500?random=204',
@@ -314,7 +314,7 @@ class MockData {
       duration: const Duration(seconds: 6),
       user: users[4], // joao_travel
     ),
-    Story(
+    StoryModel(
       id: 'story_5',
       userId: 'lucia_art',
       mediaUrl: 'https://picsum.photos/300/500?random=205',
@@ -323,7 +323,7 @@ class MockData {
       duration: const Duration(seconds: 4),
       user: users[5], // lucia_art
     ),
-    Story(
+    StoryModel(
       id: 'story_6',
       userId: 'pedro_food',
       mediaUrl: 'https://picsum.photos/300/500?random=206',
@@ -332,7 +332,7 @@ class MockData {
       duration: const Duration(seconds: 5),
       user: users[6], // pedro_food
     ),
-    Story(
+    StoryModel(
       id: 'story_7',
       userId: 'sofia_music',
       mediaUrl: 'https://picsum.photos/300/500?random=207',
@@ -341,7 +341,7 @@ class MockData {
       duration: const Duration(seconds: 3),
       user: users[7], // sofia_music
     ),
-    Story(
+    StoryModel(
       id: 'story_8',
       userId: 'rafael_tech',
       mediaUrl: 'https://picsum.photos/300/500?random=208',
@@ -350,7 +350,7 @@ class MockData {
       duration: const Duration(seconds: 4),
       user: users[8], // rafael_tech
     ),
-    Story(
+    StoryModel(
       id: 'story_9',
       userId: 'camila_design',
       mediaUrl: 'https://picsum.photos/300/500?random=209',
@@ -359,7 +359,7 @@ class MockData {
       duration: const Duration(seconds: 5),
       user: users[9], // camila_design
     ),
-    Story(
+    StoryModel(
       id: 'story_10',
       userId: 'lucas_gamer',
       mediaUrl: 'https://picsum.photos/300/500?random=210',
@@ -371,8 +371,8 @@ class MockData {
   ];
 
   // Comentários mock
-  static final List<Comment> comments = [
-    Comment(
+  static final List<CommentModel> comments = [
+    CommentModel(
       id: 'comment_1',
       postId: 'post_1',
       userId: 'carlos_dev',
@@ -382,7 +382,7 @@ class MockData {
       isLiked: false,
       user: users[2], // carlos_dev
     ),
-    Comment(
+    CommentModel(
       id: 'comment_2',
       postId: 'post_1',
       userId: 'maria_fitness',
@@ -392,7 +392,7 @@ class MockData {
       isLiked: true,
       user: users[3], // maria_fitness
     ),
-    Comment(
+    CommentModel(
       id: 'comment_3',
       postId: 'post_2',
       userId: 'ana_silva',
@@ -402,7 +402,7 @@ class MockData {
       isLiked: false,
       user: users[1], // ana_silva
     ),
-    Comment(
+    CommentModel(
       id: 'comment_4',
       postId: 'post_2',
       userId: 'rafael_tech',
@@ -412,7 +412,7 @@ class MockData {
       isLiked: false,
       user: users[8], // rafael_tech
     ),
-    Comment(
+    CommentModel(
       id: 'comment_5',
       postId: 'post_3',
       userId: 'joao_travel',
@@ -422,7 +422,7 @@ class MockData {
       isLiked: true,
       user: users[4], // joao_travel
     ),
-    Comment(
+    CommentModel(
       id: 'comment_6',
       postId: 'post_4',
       userId: 'lucia_art',
@@ -432,7 +432,7 @@ class MockData {
       isLiked: false,
       user: users[5], // lucia_art
     ),
-    Comment(
+    CommentModel(
       id: 'comment_7',
       postId: 'post_5',
       userId: 'pedro_food',
@@ -442,7 +442,7 @@ class MockData {
       isLiked: true,
       user: users[6], // pedro_food
     ),
-    Comment(
+    CommentModel(
       id: 'comment_8',
       postId: 'post_6',
       userId: 'sofia_music',
@@ -452,7 +452,7 @@ class MockData {
       isLiked: false,
       user: users[7], // sofia_music
     ),
-    Comment(
+    CommentModel(
       id: 'comment_9',
       postId: 'post_7',
       userId: 'camila_design',
@@ -462,7 +462,7 @@ class MockData {
       isLiked: true,
       user: users[9], // camila_design
     ),
-    Comment(
+    CommentModel(
       id: 'comment_10',
       postId: 'post_8',
       userId: 'lucas_gamer',
@@ -475,23 +475,23 @@ class MockData {
   ];
 
   // Métodos para obter dados específicos
-  static List<Post> getPosts() => posts;
-  static List<Story> getStories() => stories;
-  static List<Comment> getComments() => comments;
+  static List<PostModel> getPosts() => posts;
+  static List<StoryModel> getStories() => stories;
+  static List<CommentModel> getComments() => comments;
   
-  static List<Post> getPostsByUser(String userId) {
+  static List<PostModel> getPostsByUserModel(String userId) {
     return posts.where((post) => post.userId == userId).toList();
   }
   
-  static List<Comment> getCommentsByPost(String postId) {
+  static List<CommentModel> getCommentsByPostModel(String postId) {
     return comments.where((comment) => comment.postId == postId).toList();
   }
   
-  static List<Story> getStoriesByUser(String userId) {
+  static List<StoryModel> getStoriesByUserModel(String userId) {
     return stories.where((story) => story.userId == userId).toList();
   }
   
-  static Post? getPostById(String id) {
+  static PostModel? getPostById(String id) {
     try {
       return posts.firstWhere((post) => post.id == id);
     } catch (e) {
@@ -499,7 +499,7 @@ class MockData {
     }
   }
   
-  static Story? getStoryById(String id) {
+  static StoryModel? getStoryById(String id) {
     try {
       return stories.firstWhere((story) => story.id == id);
     } catch (e) {
@@ -507,11 +507,32 @@ class MockData {
     }
   }
   
-  static Comment? getCommentById(String id) {
+  static CommentModel? getCommentById(String id) {
     try {
       return comments.firstWhere((comment) => comment.id == id);
     } catch (e) {
       return null;
     }
+  }
+  
+  // Métodos adicionais para compatibilidade
+  static UserModel getCurrentUser() {
+    return getCurrentUserModel();
+  }
+  
+  static List<StoryModel> getStoriesByUser(String userId) {
+    return getStoriesByUserModel(userId);
+  }
+  
+  static StoryModel? getStoryModelById(String id) {
+    return getStoryById(id);
+  }
+  
+  static List<UserModel> getRandomUserModels({int count = 5}) {
+    return getRandomUsers(count: count);
+  }
+  
+  static UserModel? getUserModelById(String id) {
+    return getUserById(id);
   }
 }

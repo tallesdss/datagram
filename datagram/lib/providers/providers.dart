@@ -97,8 +97,8 @@ final generalStatsProvider = Provider<Map<String, int>>((ref) {
     'totalStories': stories.length,
     'totalComments': comments.length,
     'totalUsers': users.length,
-    'totalLikes': posts.fold(0, (sum, post) => sum + post.likesCount),
-    'totalViews': stories.where((story) => story.isViewed).length,
+    'totalLikes': posts.fold(0, (sum, post) => sum + (post.likesCount ?? 0)),
+    'totalViews': stories.where((story) => story.isViewed ?? false).length,
   };
 });
 
@@ -130,23 +130,23 @@ final globalSearchProvider = Provider.family<List<Map<String, dynamic>>, String>
   
   // Buscar usuários
   final matchingUsers = users.where((user) {
-    return user.username.toLowerCase().contains(query.toLowerCase()) ||
-           user.fullName.toLowerCase().contains(query.toLowerCase());
+    return (user.username ?? '').toLowerCase().contains(query.toLowerCase()) ||
+           (user.fullName ?? '').toLowerCase().contains(query.toLowerCase());
   }).toList();
   
   for (final user in matchingUsers) {
     results.add({
       'type': 'user',
       'data': user,
-      'relevance': _calculateRelevance(user.username, query),
+      'relevance': _calculateRelevance(user.username ?? '', query),
     });
   }
   
   // Buscar posts
   final matchingPosts = posts.where((post) {
-    return post.caption.toLowerCase().contains(query.toLowerCase()) ||
-           post.user.username.toLowerCase().contains(query.toLowerCase()) ||
-           post.user.fullName.toLowerCase().contains(query.toLowerCase()) ||
+    return (post.caption ?? '').toLowerCase().contains(query.toLowerCase()) ||
+           (post.user.username ?? '').toLowerCase().contains(query.toLowerCase()) ||
+           (post.user.fullName ?? '').toLowerCase().contains(query.toLowerCase()) ||
            (post.location?.toLowerCase().contains(query.toLowerCase()) ?? false);
   }).toList();
   
@@ -154,7 +154,7 @@ final globalSearchProvider = Provider.family<List<Map<String, dynamic>>, String>
     results.add({
       'type': 'post',
       'data': post,
-      'relevance': _calculateRelevance(post.caption, query),
+      'relevance': _calculateRelevance(post.caption ?? '', query),
     });
   }
   

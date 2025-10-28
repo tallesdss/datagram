@@ -13,7 +13,7 @@ class Message {
   final String text;
   final DateTime timestamp;
   final bool isRead;
-  final User sender;
+  final UserModel sender;
 
   const Message({
     required this.id,
@@ -31,7 +31,7 @@ class Conversation {
   final String id;
   final List<String> participantIds;
   final Message lastMessage;
-  final List<User> participants;
+  final List<UserModel> participants;
   final bool isGroup;
   final String? groupName;
   final String? groupImageUrl;
@@ -47,24 +47,24 @@ class Conversation {
   });
 
   // Método para obter o nome da conversa
-  String getConversationName(String currentUserId) {
+  String getConversationName(String currentUserModelId) {
     if (isGroup) {
       return groupName ?? 'Grupo';
     } else {
       // Para conversas privadas, mostrar o nome do outro usuário
-      final otherUser = participants.firstWhere((user) => user.id != currentUserId);
-      return otherUser.username;
+      final otherUserModel = participants.firstWhere((user) => user.id != currentUserModelId);
+      return otherUserModel.username;
     }
   }
 
   // Método para obter a imagem da conversa
-  String getConversationImage(String currentUserId) {
+  String getConversationImage(String currentUserModelId) {
     if (isGroup) {
       return groupImageUrl ?? 'https://picsum.photos/200/200?random=401';
     } else {
       // Para conversas privadas, mostrar a imagem do outro usuário
-      final otherUser = participants.firstWhere((user) => user.id != currentUserId);
-      return otherUser.profileImageUrl;
+      final otherUserModel = participants.firstWhere((user) => user.id != currentUserModelId);
+      return otherUserModel.profileImageUrl;
     }
   }
 }
@@ -72,14 +72,14 @@ class Conversation {
 // Provider para conversas (simulado)
 final conversationsProvider = Provider<List<Conversation>>((ref) {
   final users = ref.watch(usersProvider);
-  final currentUser = ref.watch(currentUserProvider);
+  final currentUserModel = ref.watch(currentUserModelProvider);
   
   // Criar algumas mensagens simuladas
   final messages = [
     Message(
       id: 'msg_1',
       senderId: users[1].id,
-      receiverId: currentUser.id,
+      receiverId: currentUserModel.id,
       text: 'Oi, tudo bem?',
       timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
       isRead: true,
@@ -88,7 +88,7 @@ final conversationsProvider = Provider<List<Conversation>>((ref) {
     Message(
       id: 'msg_2',
       senderId: users[2].id,
-      receiverId: currentUser.id,
+      receiverId: currentUserModel.id,
       text: 'Viu o novo projeto?',
       timestamp: DateTime.now().subtract(const Duration(hours: 1)),
       isRead: false,
@@ -97,7 +97,7 @@ final conversationsProvider = Provider<List<Conversation>>((ref) {
     Message(
       id: 'msg_3',
       senderId: users[3].id,
-      receiverId: currentUser.id,
+      receiverId: currentUserModel.id,
       text: 'Treino amanhã?',
       timestamp: DateTime.now().subtract(const Duration(hours: 3)),
       isRead: true,
@@ -105,17 +105,17 @@ final conversationsProvider = Provider<List<Conversation>>((ref) {
     ),
     Message(
       id: 'msg_4',
-      senderId: currentUser.id,
+      senderId: currentUserModel.id,
       receiverId: users[4].id,
       text: 'Adorei as fotos da viagem!',
       timestamp: DateTime.now().subtract(const Duration(days: 1)),
       isRead: true,
-      sender: currentUser,
+      sender: currentUserModel,
     ),
     Message(
       id: 'msg_5',
       senderId: users[5].id,
-      receiverId: currentUser.id,
+      receiverId: currentUserModel.id,
       text: 'Viu minha nova arte?',
       timestamp: DateTime.now().subtract(const Duration(days: 2)),
       isRead: true,
@@ -127,37 +127,37 @@ final conversationsProvider = Provider<List<Conversation>>((ref) {
   return [
     Conversation(
       id: 'conv_1',
-      participantIds: [currentUser.id, users[1].id],
+      participantIds: [currentUserModel.id, users[1].id],
       lastMessage: messages[0],
-      participants: [currentUser, users[1]],
+      participants: [currentUserModel, users[1]],
     ),
     Conversation(
       id: 'conv_2',
-      participantIds: [currentUser.id, users[2].id],
+      participantIds: [currentUserModel.id, users[2].id],
       lastMessage: messages[1],
-      participants: [currentUser, users[2]],
+      participants: [currentUserModel, users[2]],
     ),
     Conversation(
       id: 'conv_3',
-      participantIds: [currentUser.id, users[3].id],
+      participantIds: [currentUserModel.id, users[3].id],
       lastMessage: messages[2],
-      participants: [currentUser, users[3]],
+      participants: [currentUserModel, users[3]],
     ),
     Conversation(
       id: 'conv_4',
-      participantIds: [currentUser.id, users[4].id],
+      participantIds: [currentUserModel.id, users[4].id],
       lastMessage: messages[3],
-      participants: [currentUser, users[4]],
+      participants: [currentUserModel, users[4]],
     ),
     Conversation(
       id: 'conv_5',
-      participantIds: [currentUser.id, users[5].id],
+      participantIds: [currentUserModel.id, users[5].id],
       lastMessage: messages[4],
-      participants: [currentUser, users[5]],
+      participants: [currentUserModel, users[5]],
     ),
     Conversation(
       id: 'conv_6',
-      participantIds: [currentUser.id, users[1].id, users[2].id, users[3].id],
+      participantIds: [currentUserModel.id, users[1].id, users[2].id, users[3].id],
       lastMessage: Message(
         id: 'msg_6',
         senderId: users[1].id,
@@ -167,7 +167,7 @@ final conversationsProvider = Provider<List<Conversation>>((ref) {
         isRead: true,
         sender: users[1],
       ),
-      participants: [currentUser, users[1], users[2], users[3]],
+      participants: [currentUserModel, users[1], users[2], users[3]],
       isGroup: true,
       groupName: 'Amigos',
       groupImageUrl: 'https://picsum.photos/200/200?random=401',
@@ -178,7 +178,7 @@ final conversationsProvider = Provider<List<Conversation>>((ref) {
 // Provider para mensagens de uma conversa específica (simulado)
 final conversationMessagesProvider = Provider.family<List<Message>, String>((ref, conversationId) {
   final users = ref.watch(usersProvider);
-  final currentUser = ref.watch(currentUserProvider);
+  final currentUserModel = ref.watch(currentUserModelProvider);
   
   // Simular mensagens para a conversa
   switch (conversationId) {
@@ -187,7 +187,7 @@ final conversationMessagesProvider = Provider.family<List<Message>, String>((ref
         Message(
           id: 'msg_1_1',
           senderId: users[1].id,
-          receiverId: currentUser.id,
+          receiverId: currentUserModel.id,
           text: 'Oi, tudo bem?',
           timestamp: DateTime.now().subtract(const Duration(days: 1, hours: 2)),
           isRead: true,
@@ -195,17 +195,17 @@ final conversationMessagesProvider = Provider.family<List<Message>, String>((ref
         ),
         Message(
           id: 'msg_1_2',
-          senderId: currentUser.id,
+          senderId: currentUserModel.id,
           receiverId: users[1].id,
           text: 'Tudo ótimo! E você?',
           timestamp: DateTime.now().subtract(const Duration(days: 1, hours: 1)),
           isRead: true,
-          sender: currentUser,
+          sender: currentUserModel,
         ),
         Message(
           id: 'msg_1_3',
           senderId: users[1].id,
-          receiverId: currentUser.id,
+          receiverId: currentUserModel.id,
           text: 'Também estou bem! Viu minhas novas fotos?',
           timestamp: DateTime.now().subtract(const Duration(hours: 5)),
           isRead: true,
@@ -213,17 +213,17 @@ final conversationMessagesProvider = Provider.family<List<Message>, String>((ref
         ),
         Message(
           id: 'msg_1_4',
-          senderId: currentUser.id,
+          senderId: currentUserModel.id,
           receiverId: users[1].id,
           text: 'Vi sim, ficaram incríveis!',
           timestamp: DateTime.now().subtract(const Duration(hours: 4)),
           isRead: true,
-          sender: currentUser,
+          sender: currentUserModel,
         ),
         Message(
           id: 'msg_1_5',
           senderId: users[1].id,
-          receiverId: currentUser.id,
+          receiverId: currentUserModel.id,
           text: 'Obrigada! Vamos marcar algo em breve?',
           timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
           isRead: true,
@@ -255,12 +255,12 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
   @override
   Widget build(BuildContext context) {
     final conversations = ref.watch(conversationsProvider);
-    final currentUser = ref.watch(currentUserProvider);
+    final currentUserModel = ref.watch(currentUserModelProvider);
     
     // Filtrar conversas se estiver pesquisando
     final filteredConversations = _isSearching && _searchController.text.isNotEmpty
         ? conversations.where((conv) {
-            final name = conv.getConversationName(currentUser.id).toLowerCase();
+            final name = conv.getConversationName(currentUserModel.id).toLowerCase();
             return name.contains(_searchController.text.toLowerCase());
           }).toList()
         : conversations;
@@ -346,21 +346,21 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
               itemCount: filteredConversations.length,
               itemBuilder: (context, index) {
                 final conversation = filteredConversations[index];
-                final isCurrentUserSender = conversation.lastMessage.senderId == currentUser.id;
-                final hasUnreadMessages = !conversation.lastMessage.isRead && !isCurrentUserSender;
+                final isCurrentUserModelSender = conversation.lastMessage.senderId == currentUserModel.id;
+                final hasUnreadMessages = !conversation.lastMessage.isRead && !isCurrentUserModelSender;
                 
                 return ListTile(
                   leading: CircleAvatar(
                     radius: 24,
                     backgroundImage: CachedNetworkImageProvider(
-                      conversation.getConversationImage(currentUser.id),
+                      conversation.getConversationImage(currentUserModel.id),
                     ),
                   ),
                   title: Row(
                     children: [
                       Expanded(
                         child: Text(
-                          conversation.getConversationName(currentUser.id),
+                          conversation.getConversationName(currentUserModel.id),
                           style: TextStyle(
                             fontWeight: hasUnreadMessages ? FontWeight.bold : FontWeight.normal,
                           ),
@@ -378,7 +378,7 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
                   ),
                   subtitle: Row(
                     children: [
-                      if (isCurrentUserSender)
+                      if (isCurrentUserModelSender)
                         const Text(
                           'Você: ',
                           style: TextStyle(fontSize: 14),
@@ -430,7 +430,7 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
 
   void _showNewMessageDialog(BuildContext context) {
     final users = ref.read(usersProvider);
-    final currentUser = ref.read(currentUserProvider);
+    final currentUserModel = ref.read(currentUserModelProvider);
     
     showModalBottomSheet(
       context: context,
@@ -483,7 +483,7 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
                 itemCount: users.length,
                 itemBuilder: (context, index) {
                   final user = users[index];
-                  if (user.id == currentUser.id) return const SizedBox.shrink();
+                  if (user.id == currentUserModel.id) return const SizedBox.shrink();
                   
                   return ListTile(
                     leading: CircleAvatar(
@@ -515,7 +515,7 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
     );
   }
 
-  void _openNewConversation(BuildContext context, User user) {
+  void _openNewConversation(BuildContext context, UserModel user) {
     // Em uma implementação real, aqui criaríamos uma nova conversa
     // Por enquanto, vamos apenas mostrar uma mensagem
     ScaffoldMessenger.of(context).showSnackBar(
@@ -576,7 +576,7 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final messages = ref.watch(conversationMessagesProvider(widget.conversationId));
-    final currentUser = ref.watch(currentUserProvider);
+    final currentUserModel = ref.watch(currentUserModelProvider);
     final conversations = ref.watch(conversationsProvider);
     final conversation = conversations.firstWhere((c) => c.id == widget.conversationId);
     
@@ -587,11 +587,11 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
             CircleAvatar(
               radius: 16,
               backgroundImage: CachedNetworkImageProvider(
-                conversation.getConversationImage(currentUser.id),
+                conversation.getConversationImage(currentUserModel.id),
               ),
             ),
             const SizedBox(width: 8),
-            Text(conversation.getConversationName(currentUser.id)),
+            Text(conversation.getConversationName(currentUserModel.id)),
           ],
         ),
         actions: [
@@ -627,17 +627,17 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[messages.length - 1 - index]; // Inverter ordem
-                      final isCurrentUser = message.senderId == currentUser.id;
+                      final isCurrentUserModel = message.senderId == currentUserModel.id;
                       
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                         child: Row(
-                          mainAxisAlignment: isCurrentUser
+                          mainAxisAlignment: isCurrentUserModel
                               ? MainAxisAlignment.end
                               : MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            if (!isCurrentUser)
+                            if (!isCurrentUserModel)
                               CircleAvatar(
                                 radius: 16,
                                 backgroundImage: CachedNetworkImageProvider(message.sender.profileImageUrl),
@@ -649,7 +649,7 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
                               ),
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                               decoration: BoxDecoration(
-                                color: isCurrentUser
+                                color: isCurrentUserModel
                                     ? Colors.blue
                                     : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(20),
@@ -660,7 +660,7 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
                                   Text(
                                     message.text,
                                     style: TextStyle(
-                                      color: isCurrentUser ? Colors.white : Colors.black,
+                                      color: isCurrentUserModel ? Colors.white : Colors.black,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -668,7 +668,7 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
                                     timeago.format(message.timestamp, locale: 'pt'),
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: isCurrentUser ? Colors.white70 : Colors.grey,
+                                      color: isCurrentUserModel ? Colors.white70 : Colors.grey,
                                     ),
                                   ),
                                 ],

@@ -3,42 +3,42 @@ import '../models/story_model.dart';
 import '../data/mock_data.dart';
 
 // Provider para todos os stories
-final storiesProvider = Provider<List<Story>>((ref) {
+final storiesProvider = Provider<List<StoryModel>>((ref) {
   return MockData.getStories();
 });
 
 // Provider para stories ordenados por timestamp (mais recentes primeiro)
-final sortedStoriesProvider = Provider<List<Story>>((ref) {
+final sortedStoriesProvider = Provider<List<StoryModel>>((ref) {
   final stories = ref.watch(storiesProvider);
-  final sortedStories = List<Story>.from(stories);
+  final sortedStories = List<StoryModel>.from(stories);
   sortedStories.sort((a, b) => b.timestamp.compareTo(a.timestamp));
   return sortedStories;
 });
 
 // Provider para stories não visualizados
-final unviewedStoriesProvider = Provider<List<Story>>((ref) {
+final unviewedStoriesProvider = Provider<List<StoryModel>>((ref) {
   final stories = ref.watch(storiesProvider);
   return stories.where((story) => !story.isViewed).toList();
 });
 
 // Provider para stories visualizados
-final viewedStoriesProvider = Provider<List<Story>>((ref) {
+final viewedStoriesProvider = Provider<List<StoryModel>>((ref) {
   final stories = ref.watch(storiesProvider);
   return stories.where((story) => story.isViewed).toList();
 });
 
 // Provider para stories de um usuário específico
-final storiesByUserProvider = Provider.family<List<Story>, String>((ref, userId) {
+final storiesByUserProvider = Provider.family<List<StoryModel>, String>((ref, userId) {
   return MockData.getStoriesByUser(userId);
 });
 
 // Provider para um story específico por ID
-final storyByIdProvider = Provider.family<Story?, String>((ref, id) {
-  return MockData.getStoryById(id);
+final storyByIdProvider = Provider.family<StoryModel?, String>((ref, id) {
+  return MockData.getStoryModelById(id);
 });
 
 // Provider para stories recentes (últimas 24 horas)
-final recentStoriesProvider = Provider<List<Story>>((ref) {
+final recentStoriesProvider = Provider<List<StoryModel>>((ref) {
   final stories = ref.watch(storiesProvider);
   final now = DateTime.now();
   final yesterday = now.subtract(const Duration(days: 1));
@@ -47,9 +47,9 @@ final recentStoriesProvider = Provider<List<Story>>((ref) {
 });
 
 // Provider para stories agrupados por usuário
-final storiesGroupedByUserProvider = Provider<Map<String, List<Story>>>((ref) {
+final storiesGroupedByUserProvider = Provider<Map<String, List<StoryModel>>>((ref) {
   final stories = ref.watch(sortedStoriesProvider);
-  final Map<String, List<Story>> grouped = {};
+  final Map<String, List<StoryModel>> grouped = {};
   
   for (final story in stories) {
     if (!grouped.containsKey(story.userId)) {
@@ -74,14 +74,14 @@ final usersWithViewedStoriesProvider = Provider<List<String>>((ref) {
 });
 
 // Provider para stories do usuário atual
-final currentUserStoriesProvider = Provider<List<Story>>((ref) {
+final currentUserStoriesProvider = Provider<List<StoryModel>>((ref) {
   // Este provider será conectado com o UserProvider quando integrarmos
   final stories = ref.watch(storiesProvider);
   return stories.where((story) => story.userId == 'current_user').toList();
 });
 
 // Provider para stories de usuários seguidos
-final followingUsersStoriesProvider = Provider<List<Story>>((ref) {
+final followingUsersStoriesProvider = Provider<List<StoryModel>>((ref) {
   // Este provider será conectado com o UserProvider quando integrarmos
   final stories = ref.watch(storiesProvider);
   // Por enquanto, retorna todos os stories exceto do usuário atual
@@ -89,13 +89,13 @@ final followingUsersStoriesProvider = Provider<List<Story>>((ref) {
 });
 
 // Provider para stories com duração específica
-final storiesByDurationProvider = Provider.family<List<Story>, Duration>((ref, duration) {
+final storiesByDurationProvider = Provider.family<List<StoryModel>, Duration>((ref, duration) {
   final stories = ref.watch(storiesProvider);
   return stories.where((story) => story.duration == duration).toList();
 });
 
 // Provider para stories de hoje
-final todayStoriesProvider = Provider<List<Story>>((ref) {
+final todayStoriesProvider = Provider<List<StoryModel>>((ref) {
   final stories = ref.watch(storiesProvider);
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
@@ -107,7 +107,7 @@ final todayStoriesProvider = Provider<List<Story>>((ref) {
 });
 
 // Provider para stories de ontem
-final yesterdayStoriesProvider = Provider<List<Story>>((ref) {
+final yesterdayStoriesProvider = Provider<List<StoryModel>>((ref) {
   final stories = ref.watch(storiesProvider);
   final now = DateTime.now();
   final yesterday = DateTime(now.year, now.month, now.day - 1);
@@ -133,7 +133,7 @@ final storyStatsProvider = Provider<Map<String, int>>((ref) {
 });
 
 // Provider para stories por período
-final storiesByPeriodProvider = Provider.family<List<Story>, String>((ref, period) {
+final storiesByPeriodProvider = Provider.family<List<StoryModel>, String>((ref, period) {
   switch (period.toLowerCase()) {
     case 'today':
       return ref.watch(todayStoriesProvider);

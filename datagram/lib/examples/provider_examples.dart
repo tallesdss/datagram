@@ -178,23 +178,23 @@ class ProviderExamplesScreen extends ConsumerWidget {
                         children: [
                           CircleAvatar(
                             radius: 16,
-                            backgroundImage: NetworkImage(post.user.profileImageUrl),
+                            backgroundImage: NetworkImage(post.user?.profileImageUrl ?? ''),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(post.user.username),
+                                Text(post.user?.username ?? ''),
                                 Text(
-                                  post.caption,
+                                  post.caption ?? '',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
                           ),
-                          Text('${post.likesCount} ❤️'),
+                          Text('${post.likesCount ?? 0} ❤️'),
                         ],
                       ),
                     )),
@@ -225,19 +225,19 @@ class ProviderExamplesScreen extends ConsumerWidget {
                         children: [
                           CircleAvatar(
                             radius: 16,
-                            backgroundImage: NetworkImage(comment.user.profileImageUrl),
+                            backgroundImage: NetworkImage(comment.user?.profileImageUrl ?? ''),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(comment.user.username),
-                                Text(comment.text),
+                                Text(comment.user?.username ?? ''),
+                                Text(comment.text ?? ''),
                               ],
                             ),
                           ),
-                          Text('${comment.likesCount} ❤️'),
+                          Text('${comment.likesCount ?? 0} ❤️'),
                         ],
                       ),
                     )),

@@ -3,45 +3,45 @@ import '../models/user_model.dart';
 import '../data/mock_data.dart';
 
 // Provider para o usuário atual
-final currentUserProvider = Provider<User>((ref) {
-  return MockData.getCurrentUser();
+final currentUserModelProvider = Provider<UserModel>((ref) {
+  return MockData.getCurrentUserModel();
 });
 
 // Provider para todos os usuários
-final usersProvider = Provider<List<User>>((ref) {
+final usersProvider = Provider<List<UserModel>>((ref) {
   return MockData.users;
 });
 
 // Provider para usuários aleatórios
-final randomUsersProvider = Provider.family<List<User>, int>((ref, count) {
-  return MockData.getRandomUsers(count: count);
+final randomUserModelsProvider = Provider.family<List<UserModel>, int>((ref, count) {
+  return MockData.getRandomUserModels(count: count);
 });
 
 // Provider para buscar usuário por ID
-final userByIdProvider = Provider.family<User?, String>((ref, id) {
-  return MockData.getUserById(id);
+final userByIdProvider = Provider.family<UserModel?, String>((ref, id) {
+  return MockData.getUserModelById(id);
 });
 
 // Provider para usuários seguidos pelo usuário atual
-final followingUsersProvider = Provider<List<User>>((ref) {
-  final currentUser = ref.watch(currentUserProvider);
-  final allUsers = ref.watch(usersProvider);
+final followingUserModelsProvider = Provider<List<UserModel>>((ref) {
+  final currentUserModel = ref.watch(currentUserModelProvider);
+  final allUserModels = ref.watch(usersProvider);
   
   // Simula usuários seguidos (excluindo o usuário atual)
-  return allUsers
-      .where((user) => user.id != currentUser.id)
+  return allUserModels
+      .where((user) => user.id != currentUserModel.id)
       .take(5)
       .toList();
 });
 
 // Provider para usuários sugeridos para seguir
-final suggestedUsersProvider = Provider<List<User>>((ref) {
-  final currentUser = ref.watch(currentUserProvider);
-  final allUsers = ref.watch(usersProvider);
+final suggestedUserModelsProvider = Provider<List<UserModel>>((ref) {
+  final currentUserModel = ref.watch(currentUserModelProvider);
+  final allUserModels = ref.watch(usersProvider);
   
   // Simula usuários sugeridos (excluindo o usuário atual e seguidos)
-  return allUsers
-      .where((user) => user.id != currentUser.id)
+  return allUserModels
+      .where((user) => user.id != currentUserModel.id)
       .skip(5)
       .take(3)
       .toList();
@@ -49,27 +49,27 @@ final suggestedUsersProvider = Provider<List<User>>((ref) {
 
 // Provider para estatísticas do usuário atual
 final userStatsProvider = Provider<Map<String, int>>((ref) {
-  final currentUser = ref.watch(currentUserProvider);
+  final currentUserModel = ref.watch(currentUserModelProvider);
   
   return {
-    'posts': currentUser.postsCount,
-    'followers': currentUser.followersCount,
-    'following': currentUser.followingCount,
+    'posts': currentUserModel.postsCount,
+    'followers': currentUserModel.followersCount,
+    'following': currentUserModel.followingCount,
   };
 });
 
 // Provider para verificar se um usuário está sendo seguido
 final isFollowingProvider = Provider.family<bool, String>((ref, userId) {
-  final currentUser = ref.watch(currentUserProvider);
-  final followingUsers = ref.watch(followingUsersProvider);
+  final currentUserModel = ref.watch(currentUserModelProvider);
+  final followingUserModels = ref.watch(followingUserModelsProvider);
   
-  if (userId == currentUser.id) return false;
+  if (userId == currentUserModel.id) return false;
   
-  return followingUsers.any((user) => user.id == userId);
+  return followingUserModels.any((user) => user.id == userId);
 });
 
 // Provider para o perfil de um usuário específico
-final userProfileProvider = Provider.family<User?, String>((ref, userId) {
+final userProfileProvider = Provider.family<UserModel?, String>((ref, userId) {
   return ref.watch(userByIdProvider(userId));
 });
 

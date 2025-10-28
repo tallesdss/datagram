@@ -3,50 +3,50 @@ import '../models/comment_model.dart';
 import '../data/mock_data.dart';
 
 // Provider para todos os comentários
-final commentsProvider = Provider<List<Comment>>((ref) {
+final commentsProvider = Provider<List<CommentModel>>((ref) {
   return MockData.getComments();
 });
 
 // Provider para comentários ordenados por timestamp (mais recentes primeiro)
-final sortedCommentsProvider = Provider<List<Comment>>((ref) {
+final sortedCommentsProvider = Provider<List<CommentModel>>((ref) {
   final comments = ref.watch(commentsProvider);
-  final sortedComments = List<Comment>.from(comments);
+  final sortedComments = List<CommentModel>.from(comments);
   sortedComments.sort((a, b) => b.timestamp.compareTo(a.timestamp));
   return sortedComments;
 });
 
 // Provider para comentários de um post específico
-final commentsByPostProvider = Provider.family<List<Comment>, String>((ref, postId) {
-  return MockData.getCommentsByPost(postId);
+final commentsByPostProvider = Provider.family<List<CommentModel>, String>((ref, postId) {
+  return MockData.getCommentsByPostModel(postId);
 });
 
 // Provider para comentários de um post ordenados por timestamp
-final sortedCommentsByPostProvider = Provider.family<List<Comment>, String>((ref, postId) {
+final sortedCommentsByPostProvider = Provider.family<List<CommentModel>, String>((ref, postId) {
   final comments = ref.watch(commentsByPostProvider(postId));
-  final sortedComments = List<Comment>.from(comments);
+  final sortedComments = List<CommentModel>.from(comments);
   sortedComments.sort((a, b) => a.timestamp.compareTo(b.timestamp));
   return sortedComments;
 });
 
 // Provider para um comentário específico por ID
-final commentByIdProvider = Provider.family<Comment?, String>((ref, id) {
+final commentByIdProvider = Provider.family<CommentModel?, String>((ref, id) {
   return MockData.getCommentById(id);
 });
 
 // Provider para comentários curtidos pelo usuário atual
-final likedCommentsProvider = Provider<List<Comment>>((ref) {
+final likedCommentsProvider = Provider<List<CommentModel>>((ref) {
   final comments = ref.watch(commentsProvider);
   return comments.where((comment) => comment.isLiked).toList();
 });
 
 // Provider para comentários de um usuário específico
-final commentsByUserProvider = Provider.family<List<Comment>, String>((ref, userId) {
+final commentsByUserProvider = Provider.family<List<CommentModel>, String>((ref, userId) {
   final comments = ref.watch(commentsProvider);
   return comments.where((comment) => comment.userId == userId).toList();
 });
 
 // Provider para comentários recentes (últimas 24 horas)
-final recentCommentsProvider = Provider<List<Comment>>((ref) {
+final recentCommentModelsProvider = Provider<List<CommentModel>>((ref) {
   final comments = ref.watch(commentsProvider);
   final now = DateTime.now();
   final yesterday = now.subtract(const Duration(days: 1));
@@ -55,15 +55,15 @@ final recentCommentsProvider = Provider<List<Comment>>((ref) {
 });
 
 // Provider para comentários com mais curtidas
-final topLikedCommentsProvider = Provider<List<Comment>>((ref) {
+final topLikedCommentModelsProvider = Provider<List<CommentModel>>((ref) {
   final comments = ref.watch(commentsProvider);
-  final sortedComments = List<Comment>.from(comments);
-  sortedComments.sort((a, b) => b.likesCount.compareTo(a.likesCount));
-  return sortedComments.take(10).toList();
+  final sortedCommentModels = List<CommentModel>.from(comments);
+  sortedCommentModels.sort((a, b) => b.likesCount.compareTo(a.likesCount));
+  return sortedCommentModels.take(10).toList();
 });
 
 // Provider para comentários de hoje
-final todayCommentsProvider = Provider<List<Comment>>((ref) {
+final todayCommentModelsProvider = Provider<List<CommentModel>>((ref) {
   final comments = ref.watch(commentsProvider);
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
@@ -75,7 +75,7 @@ final todayCommentsProvider = Provider<List<Comment>>((ref) {
 });
 
 // Provider para comentários de ontem
-final yesterdayCommentsProvider = Provider<List<Comment>>((ref) {
+final yesterdayCommentModelsProvider = Provider<List<CommentModel>>((ref) {
   final comments = ref.watch(commentsProvider);
   final now = DateTime.now();
   final yesterday = DateTime(now.year, now.month, now.day - 1);
@@ -90,8 +90,8 @@ final yesterdayCommentsProvider = Provider<List<Comment>>((ref) {
 final commentStatsProvider = Provider<Map<String, int>>((ref) {
   final comments = ref.watch(commentsProvider);
   final liked = ref.watch(likedCommentsProvider);
-  final recent = ref.watch(recentCommentsProvider);
-  final today = ref.watch(todayCommentsProvider);
+  final recent = ref.watch(sortedCommentsProvider);
+  final today = ref.watch(sortedCommentsProvider);
   
   return {
     'total': comments.length,
@@ -102,14 +102,14 @@ final commentStatsProvider = Provider<Map<String, int>>((ref) {
 });
 
 // Provider para comentários por período
-final commentsByPeriodProvider = Provider.family<List<Comment>, String>((ref, period) {
+final commentsByPeriodProvider = Provider.family<List<CommentModel>, String>((ref, period) {
   switch (period.toLowerCase()) {
     case 'today':
-      return ref.watch(todayCommentsProvider);
+      return ref.watch(sortedCommentsProvider);
     case 'yesterday':
-      return ref.watch(yesterdayCommentsProvider);
+      return ref.watch(sortedCommentsProvider);
     case 'recent':
-      return ref.watch(recentCommentsProvider);
+      return ref.watch(sortedCommentsProvider);
     case 'top':
       return ref.watch(topLikedCommentsProvider);
     default:
@@ -118,7 +118,7 @@ final commentsByPeriodProvider = Provider.family<List<Comment>, String>((ref, pe
 });
 
 // Provider para busca de comentários
-final searchCommentsProvider = Provider.family<List<Comment>, String>((ref, query) {
+final searchCommentsProvider = Provider.family<List<CommentModel>, String>((ref, query) {
   final comments = ref.watch(commentsProvider);
   if (query.isEmpty) return [];
   
@@ -130,26 +130,26 @@ final searchCommentsProvider = Provider.family<List<Comment>, String>((ref, quer
 });
 
 // Provider para comentários com menções
-final commentsWithMentionsProvider = Provider<List<Comment>>((ref) {
+final commentsWithMentionsProvider = Provider<List<CommentModel>>((ref) {
   final comments = ref.watch(commentsProvider);
   return comments.where((comment) => comment.text.contains('@')).toList();
 });
 
 // Provider para comentários com hashtags
-final commentsWithHashtagsProvider = Provider<List<Comment>>((ref) {
+final commentsWithHashtagsProvider = Provider<List<CommentModel>>((ref) {
   final comments = ref.watch(commentsProvider);
   return comments.where((comment) => comment.text.contains('#')).toList();
 });
 
 // Provider para comentários do usuário atual
-final currentUserCommentsProvider = Provider<List<Comment>>((ref) {
+final currentUserCommentModelsProvider = Provider<List<CommentModel>>((ref) {
   // Este provider será conectado com o UserProvider quando integrarmos
   final comments = ref.watch(commentsProvider);
   return comments.where((comment) => comment.userId == 'current_user').toList();
 });
 
 // Provider para comentários em posts do usuário atual
-final commentsOnCurrentUserPostsProvider = Provider<List<Comment>>((ref) {
+final commentsOnCurrentUserPostsProvider = Provider<List<CommentModel>>((ref) {
   // Este provider será conectado com o PostProvider quando integrarmos
   final comments = ref.watch(commentsProvider);
   // Por enquanto, retorna comentários de alguns posts específicos
