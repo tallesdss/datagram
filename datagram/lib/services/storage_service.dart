@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path/path.dart' as path_lib;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_service.dart';
@@ -9,14 +8,13 @@ class StorageService {
   final SupabaseClient _client = SupabaseService().client;
   
   /// Nome do bucket principal para mídia
-  String get _bucketName => dotenv.env['STORAGE_BUCKET_NAME'] ?? 'datagram-media';
+  String get _bucketName => 'datagram-media';
   
   /// Tamanho máximo de arquivo em MB
-  int get _maxFileSizeMB => int.tryParse(dotenv.env['MAX_FILE_SIZE_MB'] ?? '10') ?? 10;
+  int get _maxFileSizeMB => 10;
   
   /// Tipos de arquivo permitidos
-  List<String> get _allowedFileTypes => 
-      (dotenv.env['ALLOWED_FILE_TYPES'] ?? 'jpg,jpeg,png,gif,mp4,mov').split(',');
+  List<String> get _allowedFileTypes => ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov'];
   
   /// Upload de imagem para o bucket especificado
   Future<String> uploadImage({

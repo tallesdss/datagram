@@ -69,20 +69,24 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     );
   }
 
-  void _createPost() {
-    // Em uma implementação real, aqui enviaríamos a imagem para um servidor
-    // Por enquanto, vamos apenas simular o processo
+  Future<void> _createPost() async {
+    if (_imageFile == null) return;
+    
     setState(() {
       _isLoading = true;
     });
 
-    // Simular o upload
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
+    try {
+      // Criar o post com upload da imagem
+      await ref.read(postProvider.notifier).createPostWithImage(
+        imageFile: _imageFile!,
+        caption: _captionController.text.trim(),
+        location: _locationController.text.trim().isEmpty 
+            ? null 
+            : _locationController.text.trim(),
+      );
       
-      setState(() {
-        _isLoading = false;
-      });
+      if (!mounted) return;
       
       // Mostrar mensagem de sucesso
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,7 +95,21 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       
       // Voltar para a tela anterior
       Navigator.pop(context);
-    });
+      
+    } catch (e) {
+      if (!mounted) return;
+      
+      // Mostrar mensagem de erro
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao criar post: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override

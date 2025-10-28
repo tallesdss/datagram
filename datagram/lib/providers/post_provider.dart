@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:io';
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
 import '../data/mock_data.dart';
@@ -113,6 +114,28 @@ class PostNotifier extends StateNotifier<AsyncValue<List<PostModel>>> {
       final newPost = await _postService.createPost(
         caption: caption,
         imageUrl: imageUrl,
+        location: location,
+      );
+      
+      // Adicionar novo post ao estado
+      state.whenData((posts) {
+        final updatedPosts = [newPost, ...posts];
+        state = AsyncValue.data(updatedPosts);
+      });
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> createPostWithImage({
+    required File imageFile,
+    String? caption,
+    String? location,
+  }) async {
+    try {
+      final newPost = await _postService.createPostWithImage(
+        imageFile: imageFile,
+        caption: caption,
         location: location,
       );
       

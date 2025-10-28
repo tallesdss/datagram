@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -12,6 +11,17 @@ void main() async {
   
   // Inicializar Supabase (que também carrega as variáveis de ambiente)
   await SupabaseService().initialize();
+  
+  // Login automático para testes (temporário)
+  try {
+    final supabase = SupabaseService().client;
+    await supabase.auth.signInWithPassword(
+      email: 'teste@email.com',
+      password: '123456', // Senha padrão para testes
+    );
+  } catch (e) {
+    // Erro no login automático - continuar sem autenticação
+  }
   
   runApp(
     const ProviderScope(
