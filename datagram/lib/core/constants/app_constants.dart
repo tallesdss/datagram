@@ -1,5 +1,5 @@
 class AppConstants {
-  // URLs para imagens mock - usando URLs mais confiáveis
+  // URLs para imagens de fallback
   static const String placeholderImageUrl = 'https://via.placeholder.com/400x400/cccccc/666666?text=Image';
   static const String profileImageUrl = 'https://via.placeholder.com/200x200/cccccc/666666?text=Profile';
   static const String storyImageUrl = 'https://via.placeholder.com/300x500/cccccc/666666?text=Story';
@@ -35,9 +35,4 @@ class AppConstants {
   static const String appName = 'Datagram';
   static const String defaultBio = 'Esta é minha bio no Datagram';
   static const String defaultLocation = 'São Paulo, Brasil';
-  
-  // Usuário padrão para autenticação mock
-  static const String defaultUserId = 'current_user';
-  static const String defaultUsername = 'usuario_atual';
-  static const String defaultFullName = 'Usuário Atual';
 }

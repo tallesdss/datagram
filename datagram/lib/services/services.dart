@@ -9,3 +9,4 @@ export 'comment_service.dart';
 export 'story_service.dart';
 export 'notification_service.dart';
 export 'storage_service.dart';
+export 'share_service.dart';

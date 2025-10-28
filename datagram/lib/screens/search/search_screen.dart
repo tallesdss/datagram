@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/providers.dart';
+import '../../services/share_service.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -257,8 +258,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.send_outlined),
-                      onPressed: () {
-                        // Compartilhar post
+                      onPressed: () async {
+                        final shareService = ShareService();
+                        try {
+                          await shareService.sharePost(
+                            postId: post.id,
+                            username: post.user.username,
+                            caption: post.caption,
+                            imageUrl: post.imageUrl,
+                          );
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Erro ao compartilhar: $e')),
+                            );
+                          }
+                        }
                       },
                     ),
                     const Spacer(),

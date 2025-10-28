@@ -1,55 +1,42 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
-import '../data/mock_data.dart';
+import '../services/services.dart';
 
 // Provider para o usuário atual
-final currentUserModelProvider = Provider<UserModel>((ref) {
-  return MockData.getCurrentUserModel();
-});
-
-// Provider para todos os usuários
-final usersProvider = Provider<List<UserModel>>((ref) {
-  return MockData.users;
-});
-
-// Provider para usuários aleatórios
-final randomUserModelsProvider = Provider.family<List<UserModel>, int>((ref, count) {
-  return MockData.getRandomUserModels(count: count);
+final currentUserModelProvider = FutureProvider<UserModel>((ref) async {
+  final userService = UserService();
+  final currentUserId = SupabaseService().client.auth.currentUser?.id;
+  if (currentUserId == null) throw Exception('Usuário não autenticado');
+  final user = await userService.getUser(currentUserId);
+  if (user == null) throw Exception('Usuário não encontrado');
+  return user;
 });
 
 // Provider para buscar usuário por ID
-final userByIdProvider = Provider.family<UserModel?, String>((ref, id) {
-  return MockData.getUserModelById(id);
+final userByIdProvider = FutureProvider.family<UserModel?, String>((ref, id) async {
+  final userService = UserService();
+  return await userService.getUser(id);
 });
 
 // Provider para usuários seguidos pelo usuário atual
-final followingUserModelsProvider = Provider<List<UserModel>>((ref) {
-  final currentUserModel = ref.watch(currentUserModelProvider);
-  final allUserModels = ref.watch(usersProvider);
-  
-  // Simula usuários seguidos (excluindo o usuário atual)
-  return allUserModels
-      .where((user) => user.id != currentUserModel.id)
-      .take(5)
-      .toList();
+final followingUserModelsProvider = FutureProvider<List<UserModel>>((ref) async {
+  final currentUserModel = await ref.watch(currentUserModelProvider.future);
+  final userService = UserService();
+  return await userService.getFollowing(currentUserModel.id);
 });
 
 // Provider para usuários sugeridos para seguir
-final suggestedUserModelsProvider = Provider<List<UserModel>>((ref) {
-  final currentUserModel = ref.watch(currentUserModelProvider);
-  final allUserModels = ref.watch(usersProvider);
-  
-  // Simula usuários sugeridos (excluindo o usuário atual e seguidos)
-  return allUserModels
-      .where((user) => user.id != currentUserModel.id)
-      .skip(5)
-      .take(3)
-      .toList();
+final suggestedUserModelsProvider = FutureProvider<List<UserModel>>((ref) async {
+  final currentUserModel = await ref.watch(currentUserModelProvider.future);
+  final userService = UserService();
+  // Por enquanto, retorna usuários aleatórios excluindo o atual
+  final allUsers = await userService.searchUsers('');
+  return allUsers.where((user) => user.id != currentUserModel.id).take(3).toList();
 });
 
 // Provider para estatísticas do usuário atual
-final userStatsProvider = Provider<Map<String, int>>((ref) {
-  final currentUserModel = ref.watch(currentUserModelProvider);
+final userStatsProvider = FutureProvider<Map<String, int>>((ref) async {
+  final currentUserModel = await ref.watch(currentUserModelProvider.future);
   
   return {
     'posts': currentUserModel.postsCount,
@@ -59,18 +46,19 @@ final userStatsProvider = Provider<Map<String, int>>((ref) {
 });
 
 // Provider para verificar se um usuário está sendo seguido
-final isFollowingProvider = Provider.family<bool, String>((ref, userId) {
-  final currentUserModel = ref.watch(currentUserModelProvider);
-  final followingUserModels = ref.watch(followingUserModelsProvider);
+final isFollowingProvider = FutureProvider.family<bool, String>((ref, userId) async {
+  final currentUserModel = await ref.watch(currentUserModelProvider.future);
+  final userService = UserService();
   
   if (userId == currentUserModel.id) return false;
   
-  return followingUserModels.any((user) => user.id == userId);
+  return await userService.isFollowing(userId);
 });
 
 // Provider para o perfil de um usuário específico
-final userProfileProvider = Provider.family<UserModel?, String>((ref, userId) {
-  return ref.watch(userByIdProvider(userId));
+final userProfileProvider = FutureProvider.family<UserModel?, String>((ref, userId) async {
+  final userService = UserService();
+  return await userService.getUser(userId);
 });
 
 // Provider para posts de um usuário específico

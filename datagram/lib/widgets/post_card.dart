@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:go_router/go_router.dart';
 import '../providers/providers.dart';
+import '../services/share_service.dart';
 import 'safe_network_image.dart';
 
 class PostCard extends ConsumerStatefulWidget {
@@ -91,22 +92,22 @@ class _PostCardState extends ConsumerState<PostCard> {
     }
   }
 
-  void _sharePost() {
-    // Implementar compartilhamento nativo
-    // Por enquanto, apenas mostrar um diálogo
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Compartilhar'),
-        content: const Text('Funcionalidade de compartilhamento será implementada em breve.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+  void _sharePost() async {
+    final shareService = ShareService();
+    try {
+      await shareService.sharePost(
+        postId: widget.postId,
+        username: widget.username,
+        caption: widget.caption,
+        imageUrl: widget.imageUrl,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao compartilhar: $e')),
+        );
+      }
+    }
   }
 
   void _navigateToPostDetail() {

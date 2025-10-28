@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../providers/providers.dart';
 import '../../models/comment_model.dart';
+import '../../services/share_service.dart';
 
 class PostDetailScreen extends ConsumerStatefulWidget {
   final String postId;
@@ -152,8 +153,22 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.send_outlined),
-                            onPressed: () {
-                              // Implementar compartilhar post
+                            onPressed: () async {
+                              final shareService = ShareService();
+                              try {
+                                await shareService.sharePost(
+                                  postId: post.id,
+                                  username: post.user.username,
+                                  caption: post.caption,
+                                  imageUrl: post.imageUrl,
+                                );
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Erro ao compartilhar: $e')),
+                                  );
+                                }
+                              }
                             },
                           ),
                           const Spacer(),
@@ -346,6 +361,9 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   }
   
   void _showPostOptions(BuildContext context) {
+    final post = ref.read(postByIdProvider(widget.postId));
+    if (post == null) return;
+    
     showModalBottomSheet(
       context: context,
       builder: (context) => Column(
@@ -362,17 +380,45 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
           ListTile(
             leading: const Icon(Icons.link),
             title: const Text('Copiar link'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              // Implementar copiar link
+              final shareService = ShareService();
+              try {
+                await shareService.copyPostLink(postId: widget.postId);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Link copiado!')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao copiar link: $e')),
+                  );
+                }
+              }
             },
           ),
           ListTile(
             leading: const Icon(Icons.share),
             title: const Text('Compartilhar'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              // Implementar compartilhar
+              final shareService = ShareService();
+              try {
+                await shareService.sharePost(
+                  postId: widget.postId,
+                  username: post.user.username,
+                  caption: post.caption,
+                  imageUrl: post.imageUrl,
+                );
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao compartilhar: $e')),
+                  );
+                }
+              }
             },
           ),
           ListTile(

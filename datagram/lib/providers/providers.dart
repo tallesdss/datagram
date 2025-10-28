@@ -1,32 +1,28 @@
 // Exporta todos os providers do sistema
 export 'user_provider.dart';
-export 'post_provider.dart' hide sortedCommentsProvider, commentsByPostProvider;
+export 'post_provider.dart' hide commentsByPostProvider;
 export 'story_provider.dart';
 export 'comment_provider.dart';
 export 'auth_provider.dart';
 
 // Providers principais para uso geral
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'user_provider.dart';
 import 'post_provider.dart';
 import 'story_provider.dart';
-import 'comment_provider.dart';
 import 'auth_provider.dart';
 
 // Provider para o estado geral da aplicação
-final appStateProvider = Provider<Map<String, dynamic>>((ref) {
-  // Usar o currentUserProvider do auth_provider.dart em vez do user_provider.dart
+final appStateProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final authState = ref.watch(authProvider);
   final currentUser = authState.userProfile;
-  final postsCount = ref.watch(postsProvider).length;
-  final storiesCount = ref.watch(storiesProvider).length;
-  final commentsCount = ref.watch(commentsProvider).length;
+  final posts = await ref.watch(postsProvider.future);
+  final stories = await ref.watch(storiesProvider.future);
   
   return {
     'currentUser': currentUser,
-    'postsCount': postsCount,
-    'storiesCount': storiesCount,
-    'commentsCount': commentsCount,
+    'postsCount': posts.length,
+    'storiesCount': stories.length,
+    'commentsCount': 0, // Implementação temporária
     'isLoading': authState.isLoading,
     'isAuthenticated': authState.isAuthenticated,
     'lastUpdated': DateTime.now(),
@@ -86,26 +82,24 @@ final appSettingsProvider = Provider<Map<String, dynamic>>((ref) {
 });
 
 // Provider para estatísticas gerais
-final generalStatsProvider = Provider<Map<String, int>>((ref) {
-  final posts = ref.watch(postsProvider);
-  final stories = ref.watch(storiesProvider);
-  final comments = ref.watch(commentsProvider);
-  final users = ref.watch(usersProvider);
+final generalStatsProvider = FutureProvider<Map<String, int>>((ref) async {
+  final posts = await ref.watch(postsProvider.future);
+  final stories = await ref.watch(storiesProvider.future);
   
   return {
     'totalPosts': posts.length,
     'totalStories': stories.length,
-    'totalComments': comments.length,
-    'totalUsers': users.length,
+    'totalComments': 0, // Implementação temporária
+    'totalUsers': 0, // Implementação temporária
     'totalLikes': posts.fold(0, (sum, post) => sum + post.likesCount),
     'totalViews': stories.where((story) => story.isViewed).length,
   };
 });
 
 // Provider para dados do feed principal
-final mainFeedProvider = Provider<Map<String, dynamic>>((ref) {
-  final posts = ref.watch(sortedPostsProvider);
-  final stories = ref.watch(sortedStoriesProvider);
+final mainFeedProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final posts = await ref.watch(sortedPostsProvider.future);
+  final stories = await ref.watch(sortedStoriesProvider.future);
   final authState = ref.watch(authProvider);
   final currentUser = authState.userProfile;
   
@@ -120,27 +114,12 @@ final mainFeedProvider = Provider<Map<String, dynamic>>((ref) {
 });
 
 // Provider para busca global
-final globalSearchProvider = Provider.family<List<Map<String, dynamic>>, String>((ref, query) {
+final globalSearchProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, query) async {
   if (query.isEmpty) return [];
   
-  final users = ref.watch(usersProvider);
-  final posts = ref.watch(postsProvider);
+  final posts = await ref.watch(postsProvider.future);
   
   final results = <Map<String, dynamic>>[];
-  
-  // Buscar usuários
-  final matchingUsers = users.where((user) {
-    return user.username.toLowerCase().contains(query.toLowerCase()) ||
-           user.fullName.toLowerCase().contains(query.toLowerCase());
-  }).toList();
-  
-  for (final user in matchingUsers) {
-    results.add({
-      'type': 'user',
-      'data': user,
-      'relevance': _calculateRelevance(user.username, query),
-    });
-  }
   
   // Buscar posts
   final matchingPosts = posts.where((post) {

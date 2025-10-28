@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/providers.dart';
+import '../../services/share_service.dart';
 import 'dart:async';
 
 class StoryViewerScreen extends ConsumerStatefulWidget {
@@ -259,10 +260,23 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> with Sing
                     ),
                     IconButton(
                       icon: const Icon(Icons.send_outlined, color: Colors.white),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Compartilhado!')),
-                        );
+                      onPressed: () async {
+                        final story = ref.read(storyByIdProvider(widget.storyId));
+                        if (story != null) {
+                          final shareService = ShareService();
+                          try {
+                            await shareService.shareStory(
+                              storyId: story.id,
+                              username: story.user.username,
+                            );
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Erro ao compartilhar: $e')),
+                              );
+                            }
+                          }
+                        }
                       },
                     ),
                   ],
