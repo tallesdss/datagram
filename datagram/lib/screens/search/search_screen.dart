@@ -22,7 +22,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final searchResults = ref.watch(globalSearchProvider(_searchQuery));
+    final searchResultsAsync = ref.watch(globalSearchProvider(_searchQuery));
     final users = ref.watch(usersProvider);
     
     return Scaffold(
@@ -51,7 +51,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         ],
       ),
-      body: _searchQuery.isEmpty ? _buildDefaultContent(users) : _buildSearchResults(searchResults),
+      body: _searchQuery.isEmpty ? _buildDefaultContent(users) : _buildSearchResults(searchResultsAsync),
     );
   }
 
@@ -112,87 +112,106 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ),
           ),
-          ref.watch(topLikedPostModelsProvider).isEmpty
-              ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: Text('Nenhum post encontrado'),
-                  ),
-                )
-              : GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 2,
-                    mainAxisSpacing: 2,
-                  ),
-                  itemCount: ref.watch(topLikedPostModelsProvider).length,
-                  itemBuilder: (context, index) {
-                    final post = ref.watch(topLikedPostModelsProvider)[index];
-                    return GestureDetector(
-                      onTap: () {
-                        // Navegar para detalhes do post
-                      },
-                      child: Image.network(
-                        post.imageUrl,
-                        fit: BoxFit.cover,
+          Consumer(
+            builder: (context, ref, child) {
+              final topPostsAsync = ref.watch(topLikedPostModelsProvider);
+              return topPostsAsync.when(
+                data: (posts) {
+                  if (posts.isEmpty) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: Text('Nenhum post encontrado'),
                       ),
                     );
-                  },
-                ),
+                  }
+                  
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 2,
+                      mainAxisSpacing: 2,
+                    ),
+                    itemCount: posts.length,
+                    itemBuilder: (context, index) {
+                      final post = posts[index];
+                      return GestureDetector(
+                        onTap: () {
+                          // Navegar para detalhes do post
+                        },
+                        child: Image.network(
+                          post.imageUrl,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const Center(child: Text('Erro ao carregar posts')),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchResults(List<Map<String, dynamic>> results) {
-    if (results.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey,
+  Widget _buildSearchResults(AsyncValue<List<Map<String, dynamic>>> searchResultsAsync) {
+    return searchResultsAsync.when(
+      data: (results) {
+        if (results.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Nenhum resultado encontrado',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Tente pesquisar por usuários ou posts',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
             ),
-            SizedBox(height: 16),
-            Text(
-              'Nenhum resultado encontrado',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Tente pesquisar por usuários ou posts',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final result = results[index];
-        final type = result['type'] as String;
-        final data = result['data'];
-
-        if (type == 'user') {
-          return _buildUserResult(data);
-        } else if (type == 'post') {
-          return _buildPostResult(data);
+          );
         }
 
-        return const SizedBox.shrink();
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: results.length,
+          itemBuilder: (context, index) {
+            final result = results[index];
+            final type = result['type'] as String;
+            final data = result['data'];
+
+            if (type == 'user') {
+              return _buildUserResult(data);
+            } else if (type == 'post') {
+              return _buildPostResult(data);
+            }
+
+            return const SizedBox.shrink();
+          },
+        );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const Center(child: Text('Erro ao pesquisar')),
     );
   }
 

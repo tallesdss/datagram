@@ -169,6 +169,10 @@ class ProviderExamplesScreen extends ConsumerWidget {
                       loading: () => const Text('Carregando stories...'),
                       error: (error, stack) => Text('Erro: $error'),
                     ),
+                  ],
+                ),
+              ),
+            ),
             
             const SizedBox(height: 16),
             

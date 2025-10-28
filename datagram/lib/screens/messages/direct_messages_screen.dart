@@ -264,169 +264,6 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final conversations = ref.watch(conversationsProvider);
-    final currentUserModelAsync = ref.watch(currentUserModelProvider);
-    
-    return currentUserModelAsync.when(
-      data: (currentUserModel) {
-        // Filtrar conversas se estiver pesquisando
-        final filteredConversations = _isSearching && _searchController.text.isNotEmpty
-            ? conversations.where((conv) {
-                final name = conv.getConversationName(currentUserModel.id).toLowerCase();
-                return name.contains(_searchController.text.toLowerCase());
-              }).toList()
-            : conversations;
-
-        return Scaffold(
-      appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Pesquisar...',
-                  border: InputBorder.none,
-                ),
-                onChanged: (_) => setState(() {}),
-                autofocus: true,
-              )
-            : const Text('Mensagens'),
-        leading: IconButton(
-          icon: Icon(_isSearching ? Icons.arrow_back : Icons.arrow_back),
-          onPressed: () {
-            if (_isSearching) {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-            } else {
-              Navigator.pop(context);
-            }
-          },
-        ),
-        actions: [
-          if (!_isSearching)
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {
-                setState(() {
-                  _isSearching = true;
-                });
-              },
-            ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              _showNewMessageDialog(context);
-            },
-          ),
-        ],
-      ),
-      body: filteredConversations.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.chat_bubble_outline,
-                    size: 80,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _isSearching
-                        ? 'Nenhuma conversa encontrada'
-                        : 'Nenhuma conversa ainda',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (!_isSearching)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 32),
-                      child: Text(
-                        'Inicie uma conversa com seus amigos',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              itemCount: filteredConversations.length,
-              itemBuilder: (context, index) {
-                final conversation = filteredConversations[index];
-                final isCurrentUserModelSender = conversation.lastMessage.senderId == currentUserModel.id;
-                final hasUnreadMessages = !conversation.lastMessage.isRead && !isCurrentUserModelSender;
-                
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 24,
-                    backgroundImage: CachedNetworkImageProvider(
-                      conversation.getConversationImage(currentUserModel.id),
-                    ),
-                  ),
-                  title: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          conversation.getConversationName(currentUserModel.id),
-                          style: TextStyle(
-                            fontWeight: hasUnreadMessages ? FontWeight.bold : FontWeight.normal,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        _formatTimestamp(conversation.lastMessage.timestamp),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: hasUnreadMessages ? Colors.blue : Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                  subtitle: Row(
-                    children: [
-                      if (isCurrentUserModelSender)
-                        const Text(
-                          'Você: ',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      Expanded(
-                        child: Text(
-                          conversation.lastMessage.text,
-                          style: TextStyle(
-                            fontWeight: hasUnreadMessages ? FontWeight.bold : FontWeight.normal,
-                            color: hasUnreadMessages ? Colors.black : Colors.grey[600],
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (hasUnreadMessages)
-                        Container(
-                          width: 10,
-                          height: 10,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.blue,
-                          ),
-                        ),
-                    ],
-                  ),
-                  onTap: () {
-                    _openConversation(context, conversation);
-                  },
-                );
-              },
-            ),
-    );
-  }
-
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
@@ -444,79 +281,85 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
 
   void _showNewMessageDialog(BuildContext context) {
     final users = ref.read(usersProvider);
-    final currentUserModel = ref.read(currentUserModelProvider);
+    final currentUserModelAsync = ref.read(currentUserModelProvider);
     
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (_, scrollController) => Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const Expanded(
-                    child: Text(
-                      'Nova mensagem',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+    currentUserModelAsync.when(
+      data: (currentUserModel) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (context) => DraggableScrollableSheet(
+            initialChildSize: 0.9,
+            minChildSize: 0.5,
+            maxChildSize: 0.9,
+            expand: false,
+            builder: (_, scrollController) => Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(width: 48), // Para balancear o layout
-                ],
-              ),
-            ),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: 'Pesquisar...',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                      const Expanded(
+                        child: Text(
+                          'Nova mensagem',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(width: 48), // Para balancear o layout
+                    ],
                   ),
                 ),
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                controller: scrollController,
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  final user = users[index];
-                  if (user.id == currentUserModel.id) return const SizedBox.shrink();
-                  
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: CachedNetworkImageProvider(user.profileImageUrl),
+                const Divider(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      hintText: 'Pesquisar...',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
                     ),
-                    title: Text(user.username),
-                    subtitle: Text(user.fullName),
-                    onTap: () {
-                      Navigator.pop(context);
-                      // Simular criação de nova conversa
-                      _openNewConversation(context, user);
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      final user = users[index];
+                      if (user.id == currentUserModel.id) return const SizedBox.shrink();
+                      
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: CachedNetworkImageProvider(user.profileImageUrl),
+                        ),
+                        title: Text(user.username),
+                        subtitle: Text(user.fullName),
+                        onTap: () {
+                          Navigator.pop(context);
+                          // Simular criação de nova conversa
+                          _openNewConversation(context, user);
+                        },
+                      );
                     },
-                  );
-                },
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
+      loading: () {},
+      error: (_, __) {},
     );
   }
 
@@ -524,7 +367,7 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => _ChatScreen(conversationId: conversation.id),
+        builder: (context) => ChatScreen(conversationId: conversation.id),
       ),
     );
   }
@@ -541,18 +384,198 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
     final conversation = conversations.first;
     _openConversation(context, conversation);
   }
-}
-
-class _ChatScreen extends ConsumerStatefulWidget {
-  final String conversationId;
-  
-  const _ChatScreen({required this.conversationId});
 
   @override
-  ConsumerState<_ChatScreen> createState() => _ChatScreenState();
+  Widget build(BuildContext context) {
+    final conversations = ref.watch(conversationsProvider);
+    final currentUserModelAsync = ref.watch(currentUserModelProvider);
+    
+    return currentUserModelAsync.when(
+      data: (currentUserModel) {
+        // Filtrar conversas se estiver pesquisando
+        final filteredConversations = _isSearching && _searchController.text.isNotEmpty
+            ? conversations.where((conv) {
+                final name = conv.getConversationName(currentUserModel.id).toLowerCase();
+                return name.contains(_searchController.text.toLowerCase());
+              }).toList()
+            : conversations;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: _isSearching
+                ? TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Pesquisar...',
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (_) => setState(() {}),
+                    autofocus: true,
+                  )
+                : const Text('Mensagens'),
+            leading: IconButton(
+              icon: Icon(_isSearching ? Icons.arrow_back : Icons.arrow_back),
+              onPressed: () {
+                if (_isSearching) {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                  });
+                } else {
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            actions: [
+              if (!_isSearching)
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    setState(() {
+                      _isSearching = true;
+                    });
+                  },
+                ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  _showNewMessageDialog(context);
+                },
+              ),
+            ],
+          ),
+          body: filteredConversations.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.chat_bubble_outline,
+                        size: 80,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _isSearching
+                            ? 'Nenhuma conversa encontrada'
+                            : 'Nenhuma conversa ainda',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (!_isSearching)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            'Inicie uma conversa com seus amigos',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: filteredConversations.length,
+                  itemBuilder: (context, index) {
+                    final conversation = filteredConversations[index];
+                    final isCurrentUserModelSender = conversation.lastMessage.senderId == currentUserModel.id;
+                    final hasUnreadMessages = !conversation.lastMessage.isRead && !isCurrentUserModelSender;
+                    
+                    return ListTile(
+                      leading: CircleAvatar(
+                        radius: 24,
+                        backgroundImage: CachedNetworkImageProvider(
+                          conversation.getConversationImage(currentUserModel.id),
+                        ),
+                      ),
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              conversation.getConversationName(currentUserModel.id),
+                              style: TextStyle(
+                                fontWeight: hasUnreadMessages ? FontWeight.bold : FontWeight.normal,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Text(
+                            _formatTimestamp(conversation.lastMessage.timestamp),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: hasUnreadMessages ? Colors.blue : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      subtitle: Row(
+                        children: [
+                          if (isCurrentUserModelSender)
+                            const Text(
+                              'Você: ',
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          Expanded(
+                            child: Text(
+                              conversation.lastMessage.text,
+                              style: TextStyle(
+                                fontWeight: hasUnreadMessages ? FontWeight.bold : FontWeight.normal,
+                                color: hasUnreadMessages ? Colors.black : Colors.grey[600],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (hasUnreadMessages)
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.blue,
+                              ),
+                            ),
+                        ],
+                      ),
+                      onTap: () {
+                        _openConversation(context, conversation);
+                      },
+                    );
+                  },
+                ),
+        );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Erro ao carregar conversas: $error'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _ChatScreenState extends ConsumerState<_ChatScreen> {
+class ChatScreen extends ConsumerStatefulWidget {
+  final String conversationId;
+  
+  const ChatScreen({super.key, required this.conversationId});
+
+  @override
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isAttaching = false;
@@ -587,213 +610,6 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final messages = ref.watch(conversationMessagesProvider(widget.conversationId));
-    final currentUserModel = ref.watch(currentUserModelProvider);
-    final conversations = ref.watch(conversationsProvider);
-    final conversation = conversations.firstWhere((c) => c.id == widget.conversationId);
-    
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: CachedNetworkImageProvider(
-                conversation.getConversationImage(currentUserModel.id),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(conversation.getConversationName(currentUserModel.id)),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.call),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Chamada de vídeo iniciada')),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Detalhes da conversa')),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Lista de mensagens
-          Expanded(
-            child: messages.isEmpty
-                ? const Center(
-                    child: Text('Nenhuma mensagem ainda. Diga olá!'),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    reverse: true,
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[messages.length - 1 - index]; // Inverter ordem
-                      final isCurrentUserModel = message.senderId == currentUserModel.id;
-                      
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        child: Row(
-                          mainAxisAlignment: isCurrentUserModel
-                              ? MainAxisAlignment.end
-                              : MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (!isCurrentUserModel)
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundImage: CachedNetworkImageProvider(message.sender.profileImageUrl),
-                              ),
-                            const SizedBox(width: 8),
-                            Container(
-                              constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width * 0.7,
-                              ),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: isCurrentUserModel
-                                    ? Colors.blue
-                                    : Colors.grey[200],
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    message.text,
-                                    style: TextStyle(
-                                      color: isCurrentUserModel ? Colors.white : Colors.black,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    timeago.format(message.timestamp, locale: 'pt'),
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: isCurrentUserModel ? Colors.white70 : Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-          
-          // Campo de entrada de mensagem
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              border: Border(
-                top: BorderSide(
-                  color: Theme.of(context).dividerColor,
-                  width: 0.5,
-                ),
-              ),
-            ),
-            child: Column(
-              children: [
-                if (_isAttaching)
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildAttachmentButton(Icons.photo, 'Galeria', Colors.purple),
-                        _buildAttachmentButton(Icons.camera_alt, 'Câmera', Colors.red),
-                        _buildAttachmentButton(Icons.mic, 'Áudio', Colors.orange),
-                        _buildAttachmentButton(Icons.location_on, 'Local', Colors.green),
-                      ],
-                    ),
-                  ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        _isAttaching ? Icons.close : Icons.add,
-                        color: _isAttaching ? Colors.red : null,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isAttaching = !_isAttaching;
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        decoration: const InputDecoration(
-                          hintText: 'Mensagem...',
-                          border: InputBorder.none,
-                        ),
-                        maxLines: null,
-                        textCapitalization: TextCapitalization.sentences,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.camera_alt),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Abrindo câmera')),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.mic),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Gravando áudio')),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.send),
-                      color: _messageController.text.trim().isEmpty ? null : Colors.blue,
-                      onPressed: _messageController.text.trim().isEmpty ? null : _sendMessage,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-      },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Erro ao carregar mensagens: $error'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildAttachmentButton(IconData icon, String label, Color color) {
     return Column(
       children: [
@@ -818,6 +634,216 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
           style: const TextStyle(fontSize: 12),
         ),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final messages = ref.watch(conversationMessagesProvider(widget.conversationId));
+    final currentUserModelAsync = ref.watch(currentUserModelProvider);
+    final conversations = ref.watch(conversationsProvider);
+    
+    return currentUserModelAsync.when(
+      data: (currentUserModel) {
+        final conversation = conversations.firstWhere((c) => c.id == widget.conversationId);
+        
+        return Scaffold(
+          appBar: AppBar(
+            title: Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: CachedNetworkImageProvider(
+                    conversation.getConversationImage(currentUserModel.id),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(conversation.getConversationName(currentUserModel.id)),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.call),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Chamada de vídeo iniciada')),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Detalhes da conversa')),
+                  );
+                },
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              // Lista de mensagens
+              Expanded(
+                child: messages.isEmpty
+                    ? const Center(
+                        child: Text('Nenhuma mensagem ainda. Diga olá!'),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        reverse: true,
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[messages.length - 1 - index]; // Inverter ordem
+                          final isCurrentUserModel = message.senderId == currentUserModel.id;
+                          
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            child: Row(
+                              mainAxisAlignment: isCurrentUserModel
+                                  ? MainAxisAlignment.end
+                                  : MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                if (!isCurrentUserModel)
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundImage: CachedNetworkImageProvider(message.sender.profileImageUrl),
+                                  ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  constraints: BoxConstraints(
+                                    maxWidth: MediaQuery.of(context).size.width * 0.7,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: isCurrentUserModel
+                                        ? Colors.blue
+                                        : Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        message.text,
+                                        style: TextStyle(
+                                          color: isCurrentUserModel ? Colors.white : Colors.black,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        timeago.format(message.timestamp, locale: 'pt'),
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: isCurrentUserModel ? Colors.white70 : Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              
+              // Campo de entrada de mensagem
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  border: Border(
+                    top: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    if (_isAttaching)
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildAttachmentButton(Icons.photo, 'Galeria', Colors.purple),
+                            _buildAttachmentButton(Icons.camera_alt, 'Câmera', Colors.red),
+                            _buildAttachmentButton(Icons.mic, 'Áudio', Colors.orange),
+                            _buildAttachmentButton(Icons.location_on, 'Local', Colors.green),
+                          ],
+                        ),
+                      ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            _isAttaching ? Icons.close : Icons.add,
+                            color: _isAttaching ? Colors.red : null,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isAttaching = !_isAttaching;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _messageController,
+                            decoration: const InputDecoration(
+                              hintText: 'Mensagem...',
+                              border: InputBorder.none,
+                            ),
+                            maxLines: null,
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.camera_alt),
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Abrindo câmera')),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.mic),
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Gravando áudio')),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.send),
+                          color: _messageController.text.trim().isEmpty ? null : Colors.blue,
+                          onPressed: _messageController.text.trim().isEmpty ? null : _sendMessage,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Erro ao carregar mensagens: $error'),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

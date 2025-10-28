@@ -17,7 +17,7 @@ class PostDetailScreen extends ConsumerStatefulWidget {
 
 class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
   final TextEditingController _commentController = TextEditingController();
-  bool _isPostingCommentModel = false;
+  bool _isPostingComment = false;
 
   @override
   void dispose() {
@@ -25,11 +25,11 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     super.dispose();
   }
 
-  void _postCommentModel() {
+  void _postComment() {
     if (_commentController.text.trim().isEmpty) return;
     
     setState(() {
-      _isPostingCommentModel = true;
+      _isPostingComment = true;
     });
     
     // Simular envio de comentário
@@ -37,7 +37,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
       if (!mounted) return;
       
       setState(() {
-        _isPostingCommentModel = false;
+        _isPostingComment = false;
         _commentController.clear();
       });
       
@@ -48,249 +48,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final postAsync = ref.watch(postByIdProvider(widget.postId));
-    final commentsAsync = ref.watch(commentsByPostProvider(widget.postId));
-    
-    return postAsync.when(
-      data: (post) {
-        if (post == null) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Post')),
-            body: const Center(child: Text('Post não encontrado')),
-          );
-        }
-    
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(post.user.username),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {
-              _showPostOptions(context);
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Conteúdo do post
-          Expanded(
-            child: ListView(
-              children: [
-                // Header do post
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundImage: CachedNetworkImageProvider(post.user.profileImageUrl),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              post.user.username,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            if (post.location != null)
-                              Text(
-                                post.location!,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // Imagem do post
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: CachedNetworkImage(
-                    imageUrl: post.imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[300],
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.error),
-                    ),
-                  ),
-                ),
-                
-                // Ações do post
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              post.isLiked ? Icons.favorite : Icons.favorite_border,
-                              color: post.isLiked ? Colors.red : null,
-                            ),
-                            onPressed: () {
-                              // Implementar curtir post
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.chat_bubble_outline),
-                            onPressed: () {
-                              // Focar no campo de comentário
-                              FocusScope.of(context).requestFocus(FocusNode());
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.send_outlined),
-                            onPressed: () async {
-                              final shareService = ShareService();
-                              try {
-                                await shareService.sharePost(
-                                  postId: post.id,
-                                  username: post.user.username,
-                                  caption: post.caption,
-                                  imageUrl: post.imageUrl,
-                                );
-                              } catch (e) {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Erro ao compartilhar: $e')),
-                                  );
-                                }
-                              }
-                            },
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            icon: Icon(
-                              post.isSaved ? Icons.bookmark : Icons.bookmark_border,
-                            ),
-                            onPressed: () {
-                              // Implementar salvar post
-                            },
-                          ),
-                        ],
-                      ),
-                      
-                      // Contador de curtidas
-                      if (post.likesCount > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            '${post.likesCount} curtidas',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ),
-                      
-                      // Caption
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${post.user.username} ',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            TextSpan(
-                              text: post.caption,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      // Timestamp
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          timeago.format(post.timestamp, locale: 'pt'),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ),
-                      
-                      const Divider(height: 24),
-                      
-                      // Comentários
-                      Text(
-                        'Comentários',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // Lista de comentários
-                ...comments.map((comment) => _buildCommentModelItem(context, comment)),
-              ],
-            ),
-          ),
-          
-          // Campo para adicionar comentário
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              border: Border(
-                top: BorderSide(
-                  color: Theme.of(context).dividerColor,
-                  width: 0.5,
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage: CachedNetworkImageProvider(
-                    ref.watch(currentUserProvider)?.profileImageUrl ?? '',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    decoration: const InputDecoration(
-                      hintText: 'Adicione um comentário...',
-                      border: InputBorder.none,
-                    ),
-                    maxLines: 1,
-                  ),
-                ),
-                _isPostingCommentModel
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : TextButton(
-                        onPressed: _commentController.text.trim().isEmpty
-                            ? null
-                            : _postCommentModel,
-                        child: const Text('Publicar'),
-                      ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildCommentModelItem(BuildContext context, CommentModel comment) {
+  Widget _buildCommentItem(BuildContext context, CommentModel comment) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -361,77 +119,349 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
       ),
     );
   }
-  
+
   void _showPostOptions(BuildContext context) {
-    final post = ref.read(postByIdProvider(widget.postId));
-    if (post == null) return;
+    final postAsync = ref.read(postByIdProvider(widget.postId));
     
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.bookmark_outline),
-            title: const Text('Salvar'),
-            onTap: () {
-              Navigator.pop(context);
-              // Implementar salvar post
-            },
+    postAsync.when(
+      data: (post) {
+        if (post == null) return;
+        
+        showModalBottomSheet(
+          context: context,
+          builder: (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.bookmark_outline),
+                title: const Text('Salvar'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Implementar salvar post
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.link),
+                title: const Text('Copiar link'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final shareService = ShareService();
+                  try {
+                    await shareService.copyPostLink(postId: widget.postId);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Link copiado!')),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erro ao copiar link: $e')),
+                      );
+                    }
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share),
+                title: const Text('Compartilhar'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final shareService = ShareService();
+                  try {
+                    await shareService.sharePost(
+                      postId: widget.postId,
+                      username: post.user.username,
+                      caption: post.caption,
+                      imageUrl: post.imageUrl,
+                    );
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erro ao compartilhar: $e')),
+                      );
+                    }
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.report_outlined),
+                title: const Text('Denunciar'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Implementar denunciar
+                },
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.link),
-            title: const Text('Copiar link'),
-            onTap: () async {
-              Navigator.pop(context);
-              final shareService = ShareService();
-              try {
-                await shareService.copyPostLink(postId: widget.postId);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Link copiado!')),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erro ao copiar link: $e')),
-                  );
-                }
-              }
-            },
+        );
+      },
+      loading: () {},
+      error: (_, __) {},
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final postAsync = ref.watch(postByIdProvider(widget.postId));
+    final commentsAsync = ref.watch(commentsByPostProvider(widget.postId));
+    
+    return postAsync.when(
+      data: (post) {
+        if (post == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Post')),
+            body: const Center(child: Text('Post não encontrado')),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(post.user.username),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.more_vert),
+                onPressed: () {
+                  _showPostOptions(context);
+                },
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.share),
-            title: const Text('Compartilhar'),
-            onTap: () async {
-              Navigator.pop(context);
-              final shareService = ShareService();
-              try {
-                await shareService.sharePost(
-                  postId: widget.postId,
-                  username: post.user.username,
-                  caption: post.caption,
-                  imageUrl: post.imageUrl,
-                );
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erro ao compartilhar: $e')),
-                  );
-                }
-              }
-            },
+          body: Column(
+            children: [
+              // Conteúdo do post
+              Expanded(
+                child: ListView(
+                  children: [
+                    // Header do post
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundImage: CachedNetworkImageProvider(post.user.profileImageUrl),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  post.user.username,
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                if (post.location != null)
+                                  Text(
+                                    post.location!,
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Imagem do post
+                    AspectRatio(
+                      aspectRatio: 1,
+                      child: CachedNetworkImage(
+                        imageUrl: post.imageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey[300],
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.error),
+                        ),
+                      ),
+                    ),
+                    
+                    // Ações do post
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  post.isLiked ? Icons.favorite : Icons.favorite_border,
+                                  color: post.isLiked ? Colors.red : null,
+                                ),
+                                onPressed: () {
+                                  // Implementar curtir post
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.chat_bubble_outline),
+                                onPressed: () {
+                                  // Focar no campo de comentário
+                                  FocusScope.of(context).requestFocus(FocusNode());
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.send_outlined),
+                                onPressed: () async {
+                                  final shareService = ShareService();
+                                  try {
+                                    await shareService.sharePost(
+                                      postId: post.id,
+                                      username: post.user.username,
+                                      caption: post.caption,
+                                      imageUrl: post.imageUrl,
+                                    );
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Erro ao compartilhar: $e')),
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                icon: Icon(
+                                  post.isSaved ? Icons.bookmark : Icons.bookmark_border,
+                                ),
+                                onPressed: () {
+                                  // Implementar salvar post
+                                },
+                              ),
+                            ],
+                          ),
+                          
+                          // Contador de curtidas
+                          if (post.likesCount > 0)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                '${post.likesCount} curtidas',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ),
+                          
+                          // Caption
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '${post.user.username} ',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                TextSpan(
+                                  text: post.caption,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          // Timestamp
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              timeago.format(post.timestamp, locale: 'pt'),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ),
+                          
+                          const Divider(height: 24),
+                          
+                          // Comentários
+                          Text(
+                            'Comentários',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Lista de comentários
+                    commentsAsync.when(
+                      data: (comments) => Column(
+                        children: comments.map((comment) => _buildCommentItem(context, comment)).toList(),
+                      ),
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (_, __) => const Center(child: Text('Erro ao carregar comentários')),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Campo para adicionar comentário
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  border: Border(
+                    top: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundImage: CachedNetworkImageProvider(
+                        ref.watch(currentUserProvider)?.profileImageUrl ?? '',
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _commentController,
+                        decoration: const InputDecoration(
+                          hintText: 'Adicione um comentário...',
+                          border: InputBorder.none,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
+                    _isPostingComment
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : TextButton(
+                            onPressed: _commentController.text.trim().isEmpty
+                                ? null
+                                : _postComment,
+                            child: const Text('Publicar'),
+                          ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.report_outlined),
-            title: const Text('Denunciar'),
-            onTap: () {
-              Navigator.pop(context);
-              // Implementar denunciar
-            },
+        );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Erro ao carregar post: $error'),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
