@@ -53,12 +53,12 @@ class ProviderExamplesScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
-                    Text('Nome: ${currentUser.fullName}'),
-                    Text('Username: @${currentUser.username}'),
-                    Text('Bio: ${currentUser.bio}'),
-                    Text('Posts: ${currentUser.postsCount}'),
-                    Text('Seguidores: ${currentUser.followersCount}'),
-                    Text('Seguindo: ${currentUser.followingCount}'),
+                    Text('Nome: ${currentUser?.fullName ?? 'N/A'}'),
+                    Text('Username: @${currentUser?.username ?? 'N/A'}'),
+                    Text('Bio: ${currentUser?.bio ?? 'N/A'}'),
+                    Text('Posts: ${currentUser?.postsCount ?? 0}'),
+                    Text('Seguidores: ${currentUser?.followersCount ?? 0}'),
+                    Text('Seguindo: ${currentUser?.followingCount ?? 0}'),
                   ],
                 ),
               ),
@@ -178,23 +178,23 @@ class ProviderExamplesScreen extends ConsumerWidget {
                         children: [
                           CircleAvatar(
                             radius: 16,
-                            backgroundImage: NetworkImage(post.user?.profileImageUrl ?? ''),
+                            backgroundImage: NetworkImage(post.user.profileImageUrl),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(post.user?.username ?? ''),
+                                Text(post.user.username),
                                 Text(
-                                  post.caption ?? '',
+                                  post.caption,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
                           ),
-                          Text('${post.likesCount ?? 0} ❤️'),
+                          Text('${post.likesCount} ❤️'),
                         ],
                       ),
                     )),
@@ -225,19 +225,19 @@ class ProviderExamplesScreen extends ConsumerWidget {
                         children: [
                           CircleAvatar(
                             radius: 16,
-                            backgroundImage: NetworkImage(comment.user?.profileImageUrl ?? ''),
+                            backgroundImage: NetworkImage(comment.user.profileImageUrl),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(comment.user?.username ?? ''),
-                                Text(comment.text ?? ''),
+                                Text(comment.user.username),
+                                Text(comment.text),
                               ],
                             ),
                           ),
-                          Text('${comment.likesCount ?? 0} ❤️'),
+                          Text('${comment.likesCount} ❤️'),
                         ],
                       ),
                     )),

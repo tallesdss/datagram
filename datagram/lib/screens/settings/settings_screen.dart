@@ -176,7 +176,7 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   Text(
-                    'Conectado como ${currentUser.username}',
+                    'Conectado como ${currentUser?.username ?? 'Usuário'}',
                     style: const TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 8),

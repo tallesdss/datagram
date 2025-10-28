@@ -239,7 +239,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                 CircleAvatar(
                   radius: 16,
                   backgroundImage: CachedNetworkImageProvider(
-                    ref.watch(currentUserProvider).profileImageUrl,
+                    ref.watch(currentUserProvider)?.profileImageUrl ?? '',
                   ),
                 ),
                 const SizedBox(width: 12),

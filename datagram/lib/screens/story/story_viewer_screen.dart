@@ -280,7 +280,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> with Sing
                     CircleAvatar(
                       radius: 16,
                       backgroundImage: CachedNetworkImageProvider(
-                        ref.watch(currentUserProvider).profileImageUrl,
+                        ref.watch(currentUserProvider)?.profileImageUrl ?? '',
                       ),
                     ),
                     const SizedBox(width: 8),

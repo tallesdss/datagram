@@ -9,11 +9,11 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider);
     final userStats = ref.watch(userStatsProvider);
-    final userPosts = ref.watch(postsByUserProvider(currentUser.id));
+    final userPosts = ref.watch(postsByUserProvider(currentUser?.id ?? ''));
     
     return Scaffold(
       appBar: AppBar(
-        title: Text(currentUser.username),
+        title: Text(currentUser?.username ?? 'Usuário'),
         actions: [
           IconButton(
             icon: const Icon(Icons.menu),
@@ -36,7 +36,7 @@ class ProfileScreen extends ConsumerWidget {
                       // Foto do perfil
                       CircleAvatar(
                         radius: 50,
-                        backgroundImage: NetworkImage(currentUser.profileImageUrl),
+                        backgroundImage: NetworkImage(currentUser?.profileImageUrl ?? ''),
                       ),
                       const SizedBox(width: 20),
                       
@@ -63,15 +63,15 @@ class ProfileScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          currentUser.fullName,
+                          currentUser?.fullName ?? 'Nome não disponível',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
-                        if (currentUser.bio.isNotEmpty) ...[
+                        if (currentUser?.bio.isNotEmpty == true) ...[
                           const SizedBox(height: 4),
-                          Text(currentUser.bio),
+                          Text(currentUser!.bio),
                         ],
                       ],
                     ),

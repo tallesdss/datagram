@@ -146,12 +146,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: NetworkImage(currentUser.profileImageUrl),
+                        backgroundImage: NetworkImage(currentUser?.profileImageUrl ?? ''),
                         radius: 20,
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        currentUser.username,
+                        currentUser?.username ?? 'Usuário',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,

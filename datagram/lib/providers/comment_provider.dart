@@ -111,7 +111,7 @@ final commentsByPeriodProvider = Provider.family<List<CommentModel>, String>((re
     case 'recent':
       return ref.watch(sortedCommentsProvider);
     case 'top':
-      return ref.watch(topLikedCommentsProvider);
+      return ref.watch(topLikedCommentModelsProvider);
     default:
       return ref.watch(sortedCommentsProvider);
   }

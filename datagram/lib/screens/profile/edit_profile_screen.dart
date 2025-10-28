@@ -28,9 +28,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.initState();
     // Inicializar controladores com dados do usuário atual
     final user = ref.read(currentUserProvider);
-    _nameController.text = user.fullName;
-    _usernameController.text = user.username;
-    _bioController.text = user.bio;
+    _nameController.text = user?.fullName ?? '';
+    _usernameController.text = user?.username ?? '';
+    _bioController.text = user?.bio ?? '';
     _emailController.text = 'usuario@exemplo.com'; // Simulado
     _phoneController.text = '(11) 98765-4321'; // Simulado
     _websiteController.text = 'www.exemplo.com.br'; // Simulado
@@ -135,7 +135,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     radius: 50,
                     backgroundImage: _imageFile != null
                         ? FileImage(_imageFile!) as ImageProvider
-                        : CachedNetworkImageProvider(user.profileImageUrl),
+                        : CachedNetworkImageProvider(user?.profileImageUrl ?? ''),
                   ),
                   Positioned(
                     bottom: 0,

@@ -111,7 +111,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ),
           ),
-          ref.watch(topLikedPostsProvider).isEmpty
+          ref.watch(topLikedPostModelsProvider).isEmpty
               ? const Center(
                   child: Padding(
                     padding: EdgeInsets.all(32.0),
@@ -127,9 +127,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     crossAxisSpacing: 2,
                     mainAxisSpacing: 2,
                   ),
-                  itemCount: ref.watch(topLikedPostsProvider).length,
+                  itemCount: ref.watch(topLikedPostModelsProvider).length,
                   itemBuilder: (context, index) {
-                    final post = ref.watch(topLikedPostsProvider)[index];
+                    final post = ref.watch(topLikedPostModelsProvider)[index];
                     return GestureDetector(
                       onTap: () {
                         // Navegar para detalhes do post
