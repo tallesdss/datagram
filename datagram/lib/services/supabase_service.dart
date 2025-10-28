@@ -21,7 +21,7 @@ class SupabaseService {
     }
     
     final supabaseUrl = dotenv.env['SUPABASE_URL'] ?? 'https://hbtsnmunidejqpsdinux.supabase.co';
-    final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhidHNubXVuaWRlanFwc2RpbnV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzQ4MDAsImV4cCI6MjA1MDU1MDgwMH0.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8';
+    final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhidHNubXVuaWRlanFwc2RpbnV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2NTcyMzAsImV4cCI6MjA3NzIzMzIzMH0.6YNw8xiS10tFfvTysfzumgqh3WwoHhYM0YJRsRWrBaM';
     
     await Supabase.initialize(
       url: supabaseUrl,
