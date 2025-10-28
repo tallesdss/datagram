@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/post_model.dart';
 import 'supabase_service.dart';
@@ -53,20 +54,20 @@ class PostService {
     return PostModel.fromJson(response);
   }
   
-  /// Criar um novo post com upload de imagem
-  Future<PostModel> createPostWithImage({
-    required File imageFile,
+  /// Criar um novo post com upload de imagem usando bytes
+  Future<PostModel> createPostWithImageBytes({
+    required Uint8List imageBytes,
     String? caption,
     String? location,
   }) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) throw Exception('Usuário não autenticado');
     
-    // Upload da imagem
+    // Upload da imagem usando bytes
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final imagePath = 'posts/$userId/$timestamp';
-    final imageUrl = await _storageService.uploadImage(
-      image: imageFile,
+    final imageUrl = await _storageService.uploadImageBytes(
+      imageBytes: imageBytes,
       bucket: 'posts',
       path: imagePath,
     );

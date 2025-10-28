@@ -90,6 +90,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   // Inicializar o estado de autenticação
   Future<void> _initialize() async {
+    if (!mounted) return;
     state = AuthState.loading();
     
     try {
@@ -99,6 +100,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (authUser != null) {
         // Obter o perfil do usuário do banco de dados
         final userProfile = await _userService.getUser(authUser.id);
+        
+        if (!mounted) return;
         
         if (userProfile != null) {
           state = AuthState.authenticated(authUser, userProfile);
@@ -111,12 +114,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthState.unauthenticated();
       }
     } catch (e) {
+      if (!mounted) return;
       state = AuthState.error(e.toString());
     }
   }
 
   // Login com email e senha
   Future<void> signIn({required String email, required String password}) async {
+    if (!mounted) return;
     state = AuthState.loading();
     
     try {
@@ -126,9 +131,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
         password: password,
       );
       
+      if (!mounted) return;
+      
       if (response.user != null) {
         // Obter o perfil do usuário
         final userProfile = await _userService.getUser(response.user!.id);
+        
+        if (!mounted) return;
         
         if (userProfile != null) {
           state = AuthState.authenticated(response.user!, userProfile);
@@ -139,6 +148,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthState.error('Falha ao fazer login');
       }
     } catch (e) {
+      if (!mounted) return;
       state = AuthState.error(e.toString());
     }
   }
@@ -150,6 +160,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String username,
     required String fullName,
   }) async {
+    if (!mounted) return;
     state = AuthState.loading();
     
     try {
@@ -161,9 +172,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
         fullName: fullName,
       );
       
+      if (!mounted) return;
+      
       if (response.user != null) {
         // Obter o perfil do usuário
         final userProfile = await _userService.getUser(response.user!.id);
+        
+        if (!mounted) return;
         
         if (userProfile != null) {
           state = AuthState.authenticated(response.user!, userProfile);
@@ -174,6 +189,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthState.error('Falha ao criar conta');
       }
     } catch (e) {
+      if (!mounted) return;
       state = AuthState.error(e.toString());
     }
   }
@@ -182,21 +198,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> signOut() async {
     try {
       await _authService.signOut();
+      if (!mounted) return;
       state = AuthState.unauthenticated();
     } catch (e) {
+      if (!mounted) return;
       state = AuthState.error(e.toString());
     }
   }
 
   // Atualizar perfil do usuário
   Future<void> updateProfile(Map<String, dynamic> userData) async {
-    if (state.authUser == null) return;
+    if (state.authUser == null || !mounted) return;
     
     try {
       await _authService.updateProfile(userData: userData);
       
+      if (!mounted) return;
+      
       // Atualizar o estado com o novo perfil
       final updatedProfile = await _userService.getUser(state.authUser!.id);
+      
+      if (!mounted) return;
       
       if (updatedProfile != null) {
         state = state.copyWith(userProfile: updatedProfile);

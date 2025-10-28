@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:path/path.dart' as path_lib;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_service.dart';
@@ -24,6 +25,20 @@ class StorageService {
   }) async {
     return await _uploadFile(
       file: image,
+      path: path,
+      bucket: bucket ?? _bucketName,
+      isImage: true,
+    );
+  }
+  
+  /// Upload de imagem usando bytes para o bucket especificado
+  Future<String> uploadImageBytes({
+    required Uint8List imageBytes,
+    required String path,
+    String? bucket,
+  }) async {
+    return await _uploadBytes(
+      bytes: imageBytes,
       path: path,
       bucket: bucket ?? _bucketName,
       isImage: true,
@@ -85,15 +100,39 @@ class StorageService {
     return getPublicUrl(bucket, fullPath);
   }
   
-  /// Upload de avatar do usuário
-  Future<String> uploadUserAvatar(File image) async {
+  /// Upload genérico de bytes
+  Future<String> _uploadBytes({
+    required Uint8List bytes,
+    required String path,
+    required String bucket,
+    required bool isImage,
+  }) async {
+    // Verificar se o usuário está autenticado
     final userId = _client.auth.currentUser?.id;
     if (userId == null) throw Exception('Usuário não autenticado');
     
-    return await uploadImage(
-      image: image,
-      path: 'profile/avatar',
+    // Validar tamanho do arquivo
+    final fileSizeMB = bytes.length / (1024 * 1024);
+    if (fileSizeMB > _maxFileSizeMB) {
+      throw Exception('Arquivo muito grande. Limite: ${_maxFileSizeMB}MB');
+    }
+    
+    // Criar caminho com ID do usuário
+    final fileName = '$path.jpg'; // Assumir JPG por padrão
+    final fullPath = '$userId/$fileName';
+    
+    // Upload dos bytes
+    await _client.storage.from(bucket).upload(
+      fullPath,
+      bytes,
+      fileOptions: FileOptions(
+        cacheControl: '3600',
+        upsert: true,
+      ),
     );
+    
+    // Retornar URL pública do arquivo
+    return getPublicUrl(bucket, fullPath);
   }
   
   /// Upload de imagem de post

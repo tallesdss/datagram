@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
+import 'dart:typed_data';
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
 import '../data/mock_data.dart';
@@ -127,14 +128,14 @@ class PostNotifier extends StateNotifier<AsyncValue<List<PostModel>>> {
     }
   }
 
-  Future<void> createPostWithImage({
-    required File imageFile,
+  Future<void> createPostWithImageBytes({
+    required Uint8List imageBytes,
     String? caption,
     String? location,
   }) async {
     try {
-      final newPost = await _postService.createPostWithImage(
-        imageFile: imageFile,
+      final newPost = await _postService.createPostWithImageBytes(
+        imageBytes: imageBytes,
         caption: caption,
         location: location,
       );

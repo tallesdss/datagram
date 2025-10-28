@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,14 +14,14 @@ final createPostProvider = StateNotifierProvider<CreatePostNotifier, CreatePostS
 
 /// Estado da criação de post
 class CreatePostState {
-  final File? selectedImage;
+  final Uint8List? selectedImageBytes;
   final String caption;
   final String? location;
   final bool isLoading;
   final String? error;
 
   const CreatePostState({
-    this.selectedImage,
+    this.selectedImageBytes,
     this.caption = '',
     this.location,
     this.isLoading = false,
@@ -29,14 +29,14 @@ class CreatePostState {
   });
 
   CreatePostState copyWith({
-    File? selectedImage,
+    Uint8List? selectedImageBytes,
     String? caption,
     String? location,
     bool? isLoading,
     String? error,
   }) {
     return CreatePostState(
-      selectedImage: selectedImage ?? this.selectedImage,
+      selectedImageBytes: selectedImageBytes ?? this.selectedImageBytes,
       caption: caption ?? this.caption,
       location: location ?? this.location,
       isLoading: isLoading ?? this.isLoading,
@@ -62,8 +62,9 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
       );
       
       if (image != null) {
+        final bytes = await image.readAsBytes();
         state = state.copyWith(
-          selectedImage: File(image.path),
+          selectedImageBytes: bytes,
           error: null,
         );
       }
@@ -83,8 +84,9 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
       );
       
       if (image != null) {
+        final bytes = await image.readAsBytes();
         state = state.copyWith(
-          selectedImage: File(image.path),
+          selectedImageBytes: bytes,
           error: null,
         );
       }
@@ -105,12 +107,12 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
 
   /// Remover imagem selecionada
   void removeImage() {
-    state = state.copyWith(selectedImage: null);
+    state = state.copyWith(selectedImageBytes: null);
   }
 
   /// Criar post
   Future<void> createPost(WidgetRef ref) async {
-    if (state.selectedImage == null) {
+    if (state.selectedImageBytes == null) {
       state = state.copyWith(error: 'Selecione uma imagem para postar');
       return;
     }
@@ -123,8 +125,8 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
     try {
       state = state.copyWith(isLoading: true, error: null);
 
-      await ref.read(postProvider.notifier).createPostWithImage(
-        imageFile: state.selectedImage!,
+      await ref.read(postProvider.notifier).createPostWithImageBytes(
+        imageBytes: state.selectedImageBytes!,
         caption: state.caption.trim(),
         location: state.location?.trim(),
       );
@@ -173,13 +175,13 @@ class CreatePostScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: state.isLoading || state.selectedImage == null
+            onPressed: state.isLoading || state.selectedImageBytes == null
                 ? null
                 : () => notifier.createPost(ref),
             child: Text(
               'Compartilhar',
               style: TextStyle(
-                color: state.isLoading || state.selectedImage == null
+                color: state.isLoading || state.selectedImageBytes == null
                     ? AppTheme.textColor.withValues(alpha: 0.5)
                     : AppTheme.primaryColor,
                 fontSize: 16,
@@ -220,24 +222,17 @@ class CreatePostScreen extends ConsumerWidget {
           width: 1,
         ),
       ),
-      child: state.selectedImage != null
+      child: state.selectedImageBytes != null
           ? Stack(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: kIsWeb 
-                    ? Image.network(
-                        'data:image/jpeg;base64,${base64Encode(state.selectedImage!.readAsBytesSync())}',
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                      )
-                    : Image.file(
-                        state.selectedImage!,
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
+                  child: Image.memory(
+                    state.selectedImageBytes!,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 Positioned(
                   top: 8,
@@ -334,9 +329,10 @@ class CreatePostScreen extends ConsumerWidget {
   ) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // Campo de legenda
           Text(
             'Legenda',
@@ -467,6 +463,7 @@ class CreatePostScreen extends ConsumerWidget {
             ),
           ],
         ],
+        ),
       ),
     );
   }
