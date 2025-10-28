@@ -148,13 +148,13 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                   final shareService = ShareService();
                   try {
                     await shareService.copyPostLink(postId: widget.postId);
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Link copiado!')),
                       );
                     }
                   } catch (e) {
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Erro ao copiar link: $e')),
                       );
@@ -176,7 +176,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                       imageUrl: post.imageUrl,
                     );
                   } catch (e) {
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Erro ao compartilhar: $e')),
                       );
@@ -318,7 +318,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
                                       imageUrl: post.imageUrl,
                                     );
                                   } catch (e) {
-                                    if (mounted) {
+                                    if (context.mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(content: Text('Erro ao compartilhar: $e')),
                                       );

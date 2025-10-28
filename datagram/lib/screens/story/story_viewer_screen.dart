@@ -286,7 +286,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen> with Sing
                                 username: story.user.username,
                               );
                             } catch (e) {
-                              if (mounted) {
+                              if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text('Erro ao compartilhar: $e')),
                                 );

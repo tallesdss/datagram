@@ -37,9 +37,6 @@ class StorageService {
     required String path,
     String? bucket,
   }) async {
-    print('DEBUG StorageService: Iniciando uploadImageBytes');
-    print('DEBUG StorageService: Path: $path');
-    print('DEBUG StorageService: Tamanho: ${imageBytes.length} bytes');
     
     try {
       final result = await _uploadBytes(
@@ -49,10 +46,8 @@ class StorageService {
         isImage: true,
       );
       
-      print('DEBUG StorageService: Upload concluído. URL: $result');
       return result;
     } catch (e) {
-      print('DEBUG StorageService: Erro no upload: $e');
       rethrow;
     }
   }
@@ -119,42 +114,33 @@ class StorageService {
     required String bucket,
     required bool isImage,
   }) async {
-    print('DEBUG StorageService: Iniciando _uploadBytes');
     
     // Verificar se o usuário está autenticado
     final userId = _client.auth.currentUser?.id;
     if (userId == null) {
-      print('DEBUG StorageService: Usuário não autenticado');
       throw Exception('Usuário não autenticado');
     }
     
-    print('DEBUG StorageService: Usuário autenticado: $userId');
     
     // Validar tamanho do arquivo
     final fileSizeMB = bytes.length / (1024 * 1024);
-    print('DEBUG StorageService: Tamanho do arquivo: ${fileSizeMB.toStringAsFixed(2)}MB');
     
     if (fileSizeMB > _maxFileSizeMB) {
-      print('DEBUG StorageService: Arquivo muito grande: ${fileSizeMB}MB > ${_maxFileSizeMB}MB');
       throw Exception('Arquivo muito grande. Limite: ${_maxFileSizeMB}MB');
     }
     
     // Criar caminho com ID do usuário
     final fileName = '$path.jpg'; // Assumir JPG por padrão
     final fullPath = '$userId/$fileName';
-    print('DEBUG StorageService: Caminho completo: $fullPath');
     
     // Criar arquivo temporário
     final tempDir = Directory.systemTemp;
     final tempFile = File('${tempDir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.jpg');
-    print('DEBUG StorageService: Arquivo temporário: ${tempFile.path}');
     
     await tempFile.writeAsBytes(bytes);
-    print('DEBUG StorageService: Arquivo temporário criado');
     
     try {
       // Upload do arquivo temporário
-      print('DEBUG StorageService: Iniciando upload para Supabase...');
       await _client.storage.from(bucket).upload(
         fullPath,
         tempFile,
@@ -164,21 +150,17 @@ class StorageService {
         ),
       );
       
-      print('DEBUG StorageService: Upload para Supabase concluído');
       
       // Retornar URL pública do arquivo
       final publicUrl = getPublicUrl(bucket, fullPath);
-      print('DEBUG StorageService: URL pública gerada: $publicUrl');
       
       return publicUrl;
     } catch (e) {
-      print('DEBUG StorageService: Erro durante upload: $e');
       rethrow;
     } finally {
       // Limpar arquivo temporário
       if (await tempFile.exists()) {
         await tempFile.delete();
-        print('DEBUG StorageService: Arquivo temporário removido');
       }
     }
   }

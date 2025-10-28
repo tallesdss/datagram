@@ -134,10 +134,6 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
         return;
       }
 
-      print('DEBUG: Iniciando criação do post...');
-      print('DEBUG: Usuário autenticado: ${authState.authUser?.id}');
-      print('DEBUG: Tamanho da imagem: ${state.selectedImageBytes!.length} bytes');
-      print('DEBUG: Legenda: ${state.caption.trim()}');
 
       await ref.read(postProvider.notifier).createPostWithImageBytes(
         imageBytes: state.selectedImageBytes!,
@@ -145,7 +141,6 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
         location: state.location?.trim(),
       );
 
-      print('DEBUG: Post criado com sucesso!');
 
       // Limpar estado após sucesso
       state = const CreatePostState();
@@ -163,7 +158,6 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
       }
       
     } catch (e) {
-      print('DEBUG: Erro ao criar post: $e');
       state = state.copyWith(
         isLoading: false,
         error: 'Erro ao criar post: $e',

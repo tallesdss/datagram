@@ -59,44 +59,31 @@ class PostService {
     String? caption,
     String? location,
   }) async {
-    print('DEBUG PostService: Iniciando createPostWithImageBytes');
-    
     final userId = _client.auth.currentUser?.id;
     if (userId == null) {
-      print('DEBUG PostService: Usuário não autenticado');
       throw Exception('Usuário não autenticado');
     }
-    
-    print('DEBUG PostService: Usuário autenticado: $userId');
-    print('DEBUG PostService: Tamanho da imagem: ${imageBytes.length} bytes');
-    print('DEBUG PostService: Legenda: $caption');
-    print('DEBUG PostService: Localização: $location');
     
     try {
       // Upload da imagem usando bytes
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final imagePath = 'posts/$userId/$timestamp';
-      print('DEBUG PostService: Fazendo upload da imagem para: $imagePath');
       
       final imageUrl = await _storageService.uploadImageBytes(
         imageBytes: imageBytes,
         path: imagePath,
       );
       
-      print('DEBUG PostService: Upload concluído. URL: $imageUrl');
       
       // Criar o post usando o método principal
-      print('DEBUG PostService: Criando post no banco de dados...');
       final result = await createPost(
         caption: caption ?? '',
         imageUrl: imageUrl,
         location: location,
       );
       
-      print('DEBUG PostService: Post criado com sucesso!');
       return result;
     } catch (e) {
-      print('DEBUG PostService: Erro ao criar post: $e');
       rethrow;
     }
   }
