@@ -2,6 +2,73 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 import '../services/services.dart';
 
+// Provider para lista de usuários (simulado para mensagens)
+final usersProvider = Provider<List<UserModel>>((ref) {
+  // Lista simulada de usuários para demonstração
+  return [
+    UserModel(
+      id: 'user_1',
+      username: 'ana_silva',
+      fullName: 'Ana Silva',
+      bio: 'Desenvolvedora Flutter',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      postsCount: 15,
+      followersCount: 120,
+      followingCount: 80,
+      isVerified: false,
+      isPrivate: false,
+    ),
+    UserModel(
+      id: 'user_2',
+      username: 'carlos_santos',
+      fullName: 'Carlos Santos',
+      bio: 'Designer UI/UX',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      postsCount: 8,
+      followersCount: 200,
+      followingCount: 150,
+      isVerified: true,
+      isPrivate: false,
+    ),
+    UserModel(
+      id: 'user_3',
+      username: 'maria_oliveira',
+      fullName: 'Maria Oliveira',
+      bio: 'Fotógrafa',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      postsCount: 25,
+      followersCount: 500,
+      followingCount: 300,
+      isVerified: false,
+      isPrivate: false,
+    ),
+    UserModel(
+      id: 'user_4',
+      username: 'joao_costa',
+      fullName: 'João Costa',
+      bio: 'Músico',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      postsCount: 12,
+      followersCount: 80,
+      followingCount: 60,
+      isVerified: false,
+      isPrivate: true,
+    ),
+    UserModel(
+      id: 'user_5',
+      username: 'lucia_fernandes',
+      fullName: 'Lúcia Fernandes',
+      bio: 'Artista Digital',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      postsCount: 30,
+      followersCount: 1000,
+      followingCount: 200,
+      isVerified: true,
+      isPrivate: false,
+    ),
+  ];
+});
+
 // Provider para o usuário atual
 final currentUserModelProvider = FutureProvider<UserModel>((ref) async {
   final userService = UserService();

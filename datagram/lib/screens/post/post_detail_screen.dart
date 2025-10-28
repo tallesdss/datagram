@@ -50,15 +50,17 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final post = ref.watch(postByIdProvider(widget.postId));
-    final comments = ref.watch(commentsByPostProvider(widget.postId));
+    final postAsync = ref.watch(postByIdProvider(widget.postId));
+    final commentsAsync = ref.watch(commentsByPostProvider(widget.postId));
     
-    if (post == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Post')),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
+    return postAsync.when(
+      data: (post) {
+        if (post == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Post')),
+            body: const Center(child: Text('Post não encontrado')),
+          );
+        }
     
     return Scaffold(
       appBar: AppBar(

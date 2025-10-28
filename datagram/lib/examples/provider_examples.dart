@@ -78,12 +78,21 @@ class ProviderExamplesScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
-                    Text('Total de Posts: ${generalStats['totalPosts']}'),
-                    Text('Total de Stories: ${generalStats['totalStories']}'),
-                    Text('Total de Comentários: ${generalStats['totalComments']}'),
-                    Text('Total de Usuários: ${generalStats['totalUsers']}'),
-                    Text('Total de Curtidas: ${generalStats['totalLikes']}'),
-                    Text('Total de Visualizações: ${generalStats['totalViews']}'),
+                    generalStats.when(
+                      data: (stats) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Total de Posts: ${stats['totalPosts']}'),
+                          Text('Total de Stories: ${stats['totalStories']}'),
+                          Text('Total de Comentários: ${stats['totalComments']}'),
+                          Text('Total de Usuários: ${stats['totalUsers']}'),
+                          Text('Total de Curtidas: ${stats['totalLikes']}'),
+                          Text('Total de Visualizações: ${stats['totalViews']}'),
+                        ],
+                      ),
+                      loading: () => const Text('Carregando estatísticas...'),
+                      error: (error, stack) => Text('Erro: $error'),
+                    ),
                   ],
                 ),
               ),
@@ -123,38 +132,43 @@ class ProviderExamplesScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
-                    Text('Quantidade: ${unviewedStories.length}'),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 60,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: unviewedStories.length,
-                        itemBuilder: (context, index) {
-                          final story = unviewedStories[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Column(
-                              children: [
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundImage: NetworkImage(story.user.profileImageUrl),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  story.user.username,
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              ],
+                    unviewedStories.when(
+                      data: (stories) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Quantidade: ${stories.length}'),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: 60,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: stories.length,
+                              itemBuilder: (context, index) {
+                                final story = stories[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: Column(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 20,
+                                        backgroundImage: NetworkImage(story.user.profileImageUrl),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        story.user.username,
+                                        style: const TextStyle(fontSize: 10),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       ),
+                      loading: () => const Text('Carregando stories...'),
+                      error: (error, stack) => Text('Erro: $error'),
                     ),
-                  ],
-                ),
-              ),
-            ),
             
             const SizedBox(height: 16),
             
@@ -170,34 +184,43 @@ class ProviderExamplesScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
-                    Text('Quantidade: ${posts.length}'),
-                    const SizedBox(height: 8),
-                    ...posts.take(3).map((post) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
+                    posts.when(
+                      data: (postsList) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            radius: 16,
-                            backgroundImage: NetworkImage(post.user.profileImageUrl),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          Text('Quantidade: ${postsList.length}'),
+                          const SizedBox(height: 8),
+                          ...postsList.take(3).map((post) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
                               children: [
-                                Text(post.user.username),
-                                Text(
-                                  post.caption,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundImage: NetworkImage(post.user.profileImageUrl),
                                 ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(post.user.username),
+                                      Text(
+                                        post.caption,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text('${post.likesCount} ❤️'),
                               ],
                             ),
-                          ),
-                          Text('${post.likesCount} ❤️'),
+                          )),
                         ],
                       ),
-                    )),
+                      loading: () => const Text('Carregando posts...'),
+                      error: (error, stack) => Text('Erro: $error'),
+                    ),
                   ],
                 ),
               ),
@@ -217,30 +240,39 @@ class ProviderExamplesScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
-                    Text('Quantidade: ${postComments.length}'),
-                    const SizedBox(height: 8),
-                    ...postComments.take(3).map((comment) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
+                    postComments.when(
+                      data: (comments) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            radius: 16,
-                            backgroundImage: NetworkImage(comment.user.profileImageUrl),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          Text('Quantidade: ${comments.length}'),
+                          const SizedBox(height: 8),
+                          ...comments.take(3).map((comment) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
                               children: [
-                                Text(comment.user.username),
-                                Text(comment.text),
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundImage: NetworkImage(comment.user.profileImageUrl),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(comment.user.username),
+                                      Text(comment.text),
+                                    ],
+                                  ),
+                                ),
+                                Text('${comment.likesCount} ❤️'),
                               ],
                             ),
-                          ),
-                          Text('${comment.likesCount} ❤️'),
+                          )),
                         ],
                       ),
-                    )),
+                      loading: () => const Text('Carregando comentários...'),
+                      error: (error, stack) => Text('Erro: $error'),
+                    ),
                   ],
                 ),
               ),
@@ -260,30 +292,39 @@ class ProviderExamplesScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
-                    Text('Quantidade: ${searchResults.length}'),
-                    const SizedBox(height: 8),
-                    ...searchResults.take(3).map((result) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
+                    searchResults.when(
+                      data: (results) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            result['type'] == 'user' ? Icons.person : Icons.image,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              result['type'] == 'user' 
-                                ? result['data'].username 
-                                : result['data'].caption,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          Text('Quantidade: ${results.length}'),
+                          const SizedBox(height: 8),
+                          ...results.take(3).map((result) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  result['type'] == 'user' ? Icons.person : Icons.image,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    result['type'] == 'user' 
+                                      ? result['data'].username 
+                                      : result['data'].caption,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Text('${result['relevance']}'),
+                              ],
                             ),
-                          ),
-                          Text('${result['relevance']}'),
+                          )),
                         ],
                       ),
-                    )),
+                      loading: () => const Text('Carregando resultados...'),
+                      error: (error, stack) => Text('Erro: $error'),
+                    ),
                   ],
                 ),
               ),

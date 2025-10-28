@@ -37,20 +37,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  itemCount: stories.length,
+                  itemCount: stories.when(
+                    data: (storiesList) => storiesList.length,
+                    loading: () => 0,
+                    error: (_, __) => 0,
+                  ),
                   itemBuilder: (context, index) {
-                    final story = stories[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: StoryCircle(
-                        username: story.user.username,
-                        imageUrl: story.user.profileImageUrl,
-                        isViewed: story.isViewed,
-                        onTap: () {
-                          // Navegar para o visualizador de stories
-                          // Navigator.push(context, ...);
-                        },
-                      ),
+                    return stories.when(
+                      data: (storiesList) {
+                        final story = storiesList[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: StoryCircle(
+                            username: story.user.username,
+                            imageUrl: story.user.profileImageUrl,
+                            isViewed: story.isViewed,
+                            onTap: () {
+                              // Navegar para o visualizador de stories
+                              // Navigator.push(context, ...);
+                            },
+                          ),
+                        );
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
                     );
                   },
                 ),

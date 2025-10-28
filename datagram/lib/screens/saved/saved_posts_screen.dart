@@ -7,8 +7,12 @@ import '../../models/post_model.dart';
 
 // Provider para posts salvos (simulado)
 final savedPostModelsProvider = Provider<List<PostModel>>((ref) {
-  final allPostModels = ref.watch(postsProvider);
-  return allPostModels.where((post) => post.isSaved).toList();
+  final allPostModelsAsync = ref.watch(postsProvider);
+  return allPostModelsAsync.when(
+    data: (allPostModels) => allPostModels.where((post) => post.isSaved).toList(),
+    loading: () => [],
+    error: (_, __) => [],
+  );
 });
 
 // Provider para coleções de posts salvos (simulado)

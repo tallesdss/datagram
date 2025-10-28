@@ -2,7 +2,7 @@
 export 'user_provider.dart';
 export 'post_provider.dart' hide commentsByPostProvider;
 export 'story_provider.dart';
-export 'comment_provider.dart';
+export 'comment_provider.dart' hide sortedCommentsProvider;
 export 'auth_provider.dart';
 
 // Providers principais para uso geral

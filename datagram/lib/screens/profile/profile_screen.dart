@@ -7,11 +7,14 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(currentUserProvider);
-    final userStats = ref.watch(userStatsProvider);
-    final userPosts = ref.watch(postsByUserProvider(currentUser?.id ?? ''));
+    final currentUserAsync = ref.watch(currentUserProvider);
+    final userStatsAsync = ref.watch(userStatsProvider);
     
-    return Scaffold(
+    return currentUserAsync.when(
+      data: (currentUser) {
+        final userPostsAsync = ref.watch(postsByUserProvider(currentUser?.id ?? ''));
+        
+        return Scaffold(
       appBar: AppBar(
         title: Text(currentUser?.username ?? 'Usuário'),
         actions: [
@@ -45,9 +48,32 @@ class ProfileScreen extends ConsumerWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _buildStatColumn('Posts', userStats['posts']!),
-                            _buildStatColumn('Seguidores', userStats['followers']!),
-                            _buildStatColumn('Seguindo', userStats['following']!),
+                            userStatsAsync.when(
+                              data: (stats) => Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _buildStatColumn('Posts', stats['posts']!),
+                                  _buildStatColumn('Seguidores', stats['followers']!),
+                                  _buildStatColumn('Seguindo', stats['following']!),
+                                ],
+                              ),
+                              loading: () => const Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _buildStatColumn('Posts', 0),
+                                  _buildStatColumn('Seguidores', 0),
+                                  _buildStatColumn('Seguindo', 0),
+                                ],
+                              ),
+                              error: (_, __) => const Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _buildStatColumn('Posts', 0),
+                                  _buildStatColumn('Seguidores', 0),
+                                  _buildStatColumn('Seguindo', 0),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -94,7 +120,9 @@ class ProfileScreen extends ConsumerWidget {
             ),
             
             // Grid de posts
-            if (userPosts.isNotEmpty)
+            userPostsAsync.when(
+              data: (userPosts) {
+                if (userPosts.isNotEmpty) {
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -170,6 +198,23 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Erro ao carregar perfil: $error'),
+            ],
+          ),
+        ),
+      ),
     );
   }
   

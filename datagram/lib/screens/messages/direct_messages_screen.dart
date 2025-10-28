@@ -72,167 +72,179 @@ class Conversation {
 // Provider para conversas (simulado)
 final conversationsProvider = Provider<List<Conversation>>((ref) {
   final users = ref.watch(usersProvider);
-  final currentUserModel = ref.watch(currentUserModelProvider);
+  final currentUserModelAsync = ref.watch(currentUserModelProvider);
   
-  // Criar algumas mensagens simuladas
-  final messages = [
-    Message(
-      id: 'msg_1',
-      senderId: users[1].id,
-      receiverId: currentUserModel.id,
-      text: 'Oi, tudo bem?',
-      timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-      isRead: true,
-      sender: users[1],
-    ),
-    Message(
-      id: 'msg_2',
-      senderId: users[2].id,
-      receiverId: currentUserModel.id,
-      text: 'Viu o novo projeto?',
-      timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-      isRead: false,
-      sender: users[2],
-    ),
-    Message(
-      id: 'msg_3',
-      senderId: users[3].id,
-      receiverId: currentUserModel.id,
-      text: 'Treino amanhã?',
-      timestamp: DateTime.now().subtract(const Duration(hours: 3)),
-      isRead: true,
-      sender: users[3],
-    ),
-    Message(
-      id: 'msg_4',
-      senderId: currentUserModel.id,
-      receiverId: users[4].id,
-      text: 'Adorei as fotos da viagem!',
-      timestamp: DateTime.now().subtract(const Duration(days: 1)),
-      isRead: true,
-      sender: currentUserModel,
-    ),
-    Message(
-      id: 'msg_5',
-      senderId: users[5].id,
-      receiverId: currentUserModel.id,
-      text: 'Viu minha nova arte?',
-      timestamp: DateTime.now().subtract(const Duration(days: 2)),
-      isRead: true,
-      sender: users[5],
-    ),
-  ];
-  
-  // Criar conversas a partir das mensagens
-  return [
-    Conversation(
-      id: 'conv_1',
-      participantIds: [currentUserModel.id, users[1].id],
-      lastMessage: messages[0],
-      participants: [currentUserModel, users[1]],
-    ),
-    Conversation(
-      id: 'conv_2',
-      participantIds: [currentUserModel.id, users[2].id],
-      lastMessage: messages[1],
-      participants: [currentUserModel, users[2]],
-    ),
-    Conversation(
-      id: 'conv_3',
-      participantIds: [currentUserModel.id, users[3].id],
-      lastMessage: messages[2],
-      participants: [currentUserModel, users[3]],
-    ),
-    Conversation(
-      id: 'conv_4',
-      participantIds: [currentUserModel.id, users[4].id],
-      lastMessage: messages[3],
-      participants: [currentUserModel, users[4]],
-    ),
-    Conversation(
-      id: 'conv_5',
-      participantIds: [currentUserModel.id, users[5].id],
-      lastMessage: messages[4],
-      participants: [currentUserModel, users[5]],
-    ),
-    Conversation(
-      id: 'conv_6',
-      participantIds: [currentUserModel.id, users[1].id, users[2].id, users[3].id],
-      lastMessage: Message(
-        id: 'msg_6',
-        senderId: users[1].id,
-        receiverId: 'group',
-        text: 'Pessoal, vamos marcar algo?',
-        timestamp: DateTime.now().subtract(const Duration(hours: 12)),
-        isRead: true,
-        sender: users[1],
-      ),
-      participants: [currentUserModel, users[1], users[2], users[3]],
-      isGroup: true,
-      groupName: 'Amigos',
-      groupImageUrl: 'https://picsum.photos/200/200?random=401',
-    ),
-  ];
+  return currentUserModelAsync.when(
+    data: (currentUserModel) {
+      // Criar algumas mensagens simuladas
+      final messages = [
+        Message(
+          id: 'msg_1',
+          senderId: users[1].id,
+          receiverId: currentUserModel.id,
+          text: 'Oi, tudo bem?',
+          timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
+          isRead: true,
+          sender: users[1],
+        ),
+        Message(
+          id: 'msg_2',
+          senderId: users[2].id,
+          receiverId: currentUserModel.id,
+          text: 'Viu o novo projeto?',
+          timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+          isRead: false,
+          sender: users[2],
+        ),
+        Message(
+          id: 'msg_3',
+          senderId: users[3].id,
+          receiverId: currentUserModel.id,
+          text: 'Treino amanhã?',
+          timestamp: DateTime.now().subtract(const Duration(hours: 3)),
+          isRead: true,
+          sender: users[3],
+        ),
+        Message(
+          id: 'msg_4',
+          senderId: currentUserModel.id,
+          receiverId: users[4].id,
+          text: 'Adorei as fotos da viagem!',
+          timestamp: DateTime.now().subtract(const Duration(days: 1)),
+          isRead: true,
+          sender: currentUserModel,
+        ),
+        Message(
+          id: 'msg_5',
+          senderId: users[5].id,
+          receiverId: currentUserModel.id,
+          text: 'Viu minha nova arte?',
+          timestamp: DateTime.now().subtract(const Duration(days: 2)),
+          isRead: true,
+          sender: users[5],
+        ),
+      ];
+      
+      // Criar conversas a partir das mensagens
+      return [
+        Conversation(
+          id: 'conv_1',
+          participantIds: [currentUserModel.id, users[1].id],
+          lastMessage: messages[0],
+          participants: [currentUserModel, users[1]],
+        ),
+        Conversation(
+          id: 'conv_2',
+          participantIds: [currentUserModel.id, users[2].id],
+          lastMessage: messages[1],
+          participants: [currentUserModel, users[2]],
+        ),
+        Conversation(
+          id: 'conv_3',
+          participantIds: [currentUserModel.id, users[3].id],
+          lastMessage: messages[2],
+          participants: [currentUserModel, users[3]],
+        ),
+        Conversation(
+          id: 'conv_4',
+          participantIds: [currentUserModel.id, users[4].id],
+          lastMessage: messages[3],
+          participants: [currentUserModel, users[4]],
+        ),
+        Conversation(
+          id: 'conv_5',
+          participantIds: [currentUserModel.id, users[5].id],
+          lastMessage: messages[4],
+          participants: [currentUserModel, users[5]],
+        ),
+        Conversation(
+          id: 'conv_6',
+          participantIds: [currentUserModel.id, users[1].id, users[2].id, users[3].id],
+          lastMessage: Message(
+            id: 'msg_6',
+            senderId: users[1].id,
+            receiverId: 'group',
+            text: 'Pessoal, vamos marcar algo?',
+            timestamp: DateTime.now().subtract(const Duration(hours: 12)),
+            isRead: true,
+            sender: users[1],
+          ),
+          participants: [currentUserModel, users[1], users[2], users[3]],
+          isGroup: true,
+          groupName: 'Amigos',
+          groupImageUrl: 'https://picsum.photos/200/200?random=401',
+        ),
+      ];
+    },
+    loading: () => [],
+    error: (_, __) => [],
+  );
 });
 
 // Provider para mensagens de uma conversa específica (simulado)
 final conversationMessagesProvider = Provider.family<List<Message>, String>((ref, conversationId) {
   final users = ref.watch(usersProvider);
-  final currentUserModel = ref.watch(currentUserModelProvider);
+  final currentUserModelAsync = ref.watch(currentUserModelProvider);
   
-  // Simular mensagens para a conversa
-  switch (conversationId) {
-    case 'conv_1':
-      return [
-        Message(
-          id: 'msg_1_1',
-          senderId: users[1].id,
-          receiverId: currentUserModel.id,
-          text: 'Oi, tudo bem?',
-          timestamp: DateTime.now().subtract(const Duration(days: 1, hours: 2)),
-          isRead: true,
-          sender: users[1],
-        ),
-        Message(
-          id: 'msg_1_2',
-          senderId: currentUserModel.id,
-          receiverId: users[1].id,
-          text: 'Tudo ótimo! E você?',
-          timestamp: DateTime.now().subtract(const Duration(days: 1, hours: 1)),
-          isRead: true,
-          sender: currentUserModel,
-        ),
-        Message(
-          id: 'msg_1_3',
-          senderId: users[1].id,
-          receiverId: currentUserModel.id,
-          text: 'Também estou bem! Viu minhas novas fotos?',
-          timestamp: DateTime.now().subtract(const Duration(hours: 5)),
-          isRead: true,
-          sender: users[1],
-        ),
-        Message(
-          id: 'msg_1_4',
-          senderId: currentUserModel.id,
-          receiverId: users[1].id,
-          text: 'Vi sim, ficaram incríveis!',
-          timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-          isRead: true,
-          sender: currentUserModel,
-        ),
-        Message(
-          id: 'msg_1_5',
-          senderId: users[1].id,
-          receiverId: currentUserModel.id,
-          text: 'Obrigada! Vamos marcar algo em breve?',
-          timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-          isRead: true,
-          sender: users[1],
-        ),
-      ];
-    default:
-      return [];
-  }
+  return currentUserModelAsync.when(
+    data: (currentUserModel) {
+      // Simular mensagens para a conversa
+      switch (conversationId) {
+        case 'conv_1':
+          return [
+            Message(
+              id: 'msg_1_1',
+              senderId: users[1].id,
+              receiverId: currentUserModel.id,
+              text: 'Oi, tudo bem?',
+              timestamp: DateTime.now().subtract(const Duration(days: 1, hours: 2)),
+              isRead: true,
+              sender: users[1],
+            ),
+            Message(
+              id: 'msg_1_2',
+              senderId: currentUserModel.id,
+              receiverId: users[1].id,
+              text: 'Tudo ótimo! E você?',
+              timestamp: DateTime.now().subtract(const Duration(days: 1, hours: 1)),
+              isRead: true,
+              sender: currentUserModel,
+            ),
+            Message(
+              id: 'msg_1_3',
+              senderId: users[1].id,
+              receiverId: currentUserModel.id,
+              text: 'Também estou bem! Viu minhas novas fotos?',
+              timestamp: DateTime.now().subtract(const Duration(hours: 5)),
+              isRead: true,
+              sender: users[1],
+            ),
+            Message(
+              id: 'msg_1_4',
+              senderId: currentUserModel.id,
+              receiverId: users[1].id,
+              text: 'Vi sim, ficaram incríveis!',
+              timestamp: DateTime.now().subtract(const Duration(hours: 4)),
+              isRead: true,
+              sender: currentUserModel,
+            ),
+            Message(
+              id: 'msg_1_5',
+              senderId: users[1].id,
+              receiverId: currentUserModel.id,
+              text: 'Obrigada! Vamos marcar algo em breve?',
+              timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
+              isRead: true,
+              sender: users[1],
+            ),
+          ];
+        default:
+          return [];
+      }
+    },
+    loading: () => [],
+    error: (_, __) => [],
+  );
 });
 
 class DirectMessagesScreen extends ConsumerStatefulWidget {
@@ -255,17 +267,19 @@ class _DirectMessagesScreenState extends ConsumerState<DirectMessagesScreen> {
   @override
   Widget build(BuildContext context) {
     final conversations = ref.watch(conversationsProvider);
-    final currentUserModel = ref.watch(currentUserModelProvider);
+    final currentUserModelAsync = ref.watch(currentUserModelProvider);
     
-    // Filtrar conversas se estiver pesquisando
-    final filteredConversations = _isSearching && _searchController.text.isNotEmpty
-        ? conversations.where((conv) {
-            final name = conv.getConversationName(currentUserModel.id).toLowerCase();
-            return name.contains(_searchController.text.toLowerCase());
-          }).toList()
-        : conversations;
+    return currentUserModelAsync.when(
+      data: (currentUserModel) {
+        // Filtrar conversas se estiver pesquisando
+        final filteredConversations = _isSearching && _searchController.text.isNotEmpty
+            ? conversations.where((conv) {
+                final name = conv.getConversationName(currentUserModel.id).toLowerCase();
+                return name.contains(_searchController.text.toLowerCase());
+              }).toList()
+            : conversations;
 
-    return Scaffold(
+        return Scaffold(
       appBar: AppBar(
         title: _isSearching
             ? TextField(
@@ -759,6 +773,23 @@ class _ChatScreenState extends ConsumerState<_ChatScreen> {
             ),
           ),
         ],
+      ),
+    );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Erro ao carregar mensagens: $error'),
+            ],
+          ),
+        ),
       ),
     );
   }
