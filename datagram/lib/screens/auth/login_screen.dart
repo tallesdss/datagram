@@ -26,6 +26,54 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _loginWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await _authService.signInWithGoogle();
+      if (mounted) {
+        context.go('/home');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Erro ao fazer login com Google: ${e.toString()}';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loginWithFacebook() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await _authService.signInWithFacebook();
+      if (mounted) {
+        context.go('/home');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Erro ao fazer login com Facebook: ${e.toString()}';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -176,6 +224,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Text('OU'),
                       ),
                       Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Botões de autenticação social
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _isLoading ? null : _loginWithGoogle,
+                          icon: const Icon(Icons.login, size: 20),
+                          label: const Text('Google'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _isLoading ? null : _loginWithFacebook,
+                          icon: const Icon(Icons.facebook, size: 20),
+                          label: const Text('Facebook'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),

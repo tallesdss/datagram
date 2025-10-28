@@ -45,10 +45,10 @@
 
 ### 1. Configuração do Backend Supabase
 - [x] Configurar projeto Supabase com URL e chaves reais
-- [ ] Criar arquivo `.env` com variáveis de ambiente
-- [ ] Implementar migrações do banco de dados
-- [ ] Configurar políticas RLS (Row Level Security)
-- [ ] Configurar storage para imagens e vídeos
+- [x] Criar arquivo `.env` com variáveis de ambiente
+- [x] Implementar migrações do banco de dados
+- [x] Configurar políticas RLS (Row Level Security)
+- [x] Configurar storage para imagens e vídeos
 
 ### 2. Implementação dos Serviços Backend
 - [x] Finalizar implementação do `AuthService` com Supabase
@@ -61,16 +61,16 @@
 
 ### 3. Telas de Autenticação
 - [x] Finalizar tela de registro (`register_screen.dart`)
-- [ ] Implementar tela de recuperação de senha (`forgot_password_screen.dart`)
-- [ ] Finalizar tela de onboarding (`onboarding_screen.dart`)
+- [x] Implementar tela de recuperação de senha (`forgot_password_screen.dart`)
+- [x] Finalizar tela de onboarding (`onboarding_screen.dart`)
 - [x] Adicionar validação de formulários
-- [ ] Implementar autenticação social (Google, Facebook)
+- [x] Implementar autenticação social (Google, Facebook)
 
 ### 4. Funcionalidades Principais do Feed
 - [x] Implementar navegação para visualização de stories
-- [ ] Conectar ações de like/salvar com backend
-- [ ] Implementar sistema de comentários real
-- [ ] Adicionar funcionalidade de compartilhamento
+- [x] Conectar ações de like/salvar com backend
+- [x] Implementar sistema de comentários real
+- [x] Adicionar funcionalidade de compartilhamento
 - [ ] Implementar sistema de notificações em tempo real
 
 ### 5. Telas de Criação de Conteúdo
@@ -212,3 +212,120 @@
 - Conta de desenvolvimento para stores
 - Serviços de armazenamento de arquivos
 - Ferramentas de análise e monitoramento
+
+
+## Etapas que Faltam (Checklist Consolidado)
+
+### 1. Configuração do Backend Supabase
+- [x] Criar arquivo `.env` com variáveis de ambiente
+- [x] Implementar migrações do banco de dados
+- [x] Configurar políticas RLS (Row Level Security)
+- [x] Configurar storage para imagens e vídeos
+
+### 3. Telas de Autenticação
+- [x] Implementar tela de recuperação de senha (`forgot_password_screen.dart`)
+- [x] Finalizar tela de onboarding (`onboarding_screen.dart`)
+- [x] Implementar autenticação social (Google, Facebook)
+
+### 4. Funcionalidades do Feed
+- [x] Conectar ações de like/salvar com backend
+- [x] Implementar sistema de comentários real
+- [x] Adicionar funcionalidade de compartilhamento
+- [ ] Implementar sistema de notificações em tempo real
+
+### 5. Criação de Conteúdo
+- [ ] Finalizar tela de criação de stories (`create_story_screen.dart`)
+- [ ] Implementar gravação de vídeos para stories
+- [ ] Adicionar filtros e efeitos para imagens/vídeos
+
+### 6. Sistema de Busca
+- [ ] Adicionar filtros de busca
+- [ ] Implementar histórico de buscas
+- [ ] Adicionar sugestões de busca
+
+### 7. Sistema de Reels
+- [ ] Finalizar implementação da tela de reels (`reels_screen.dart`)
+- [ ] Implementar player de vídeo vertical
+- [ ] Adicionar controles de reprodução
+- [ ] Implementar sistema de curtidas e comentários para reels
+- [ ] Adicionar funcionalidade de criação de reels
+
+### 8. Mensagens Diretas
+- [ ] Finalizar tela de mensagens (`direct_messages_screen.dart`)
+- [ ] Implementar lista de conversas
+- [ ] Criar interface de chat individual
+- [ ] Implementar envio de mensagens de texto
+- [ ] Adicionar envio de imagens e vídeos
+- [ ] Implementar notificações de mensagens
+
+### 9. Perfil
+- [ ] Implementar edição de perfil (`edit_profile_screen.dart`)
+- [ ] Adicionar sistema de seguidores/seguindo
+- [ ] Implementar posts salvos (`saved_posts_screen.dart`)
+- [ ] Implementar sistema de bloqueio/desbloqueio
+
+### 10. Atividades
+- [ ] Finalizar tela de atividades (`activity_screen.dart`)
+- [ ] Implementar notificações de curtidas
+- [ ] Adicionar notificações de comentários
+- [ ] Implementar notificações de seguidores
+- [ ] Adicionar notificações de stories
+- [ ] Implementar sistema de marcar como lida
+
+### 11. Configurações
+- [ ] Finalizar tela de configurações (`settings_screen.dart`)
+- [ ] Implementar configurações de privacidade
+- [ ] Adicionar configurações de notificações
+- [ ] Implementar tema escuro/claro
+- [ ] Adicionar configurações de conta
+- [ ] Implementar logout e exclusão de conta
+
+### 12. Widgets e Componentes
+- [ ] Criar widgets para comentários
+- [ ] Implementar widgets de notificação
+- [ ] Adicionar widgets de loading e erro
+- [ ] Implementar animações e transições
+
+### 13. Integração com Providers
+- [ ] Implementar cache local com Hive/SharedPreferences
+- [ ] Adicionar tratamento de erros global
+- [ ] Implementar refresh automático de dados
+- [ ] Adicionar sincronização offline
+
+### 14. Testes e Qualidade
+- [ ] Implementar testes unitários para providers
+- [ ] Adicionar testes de widget para telas principais
+- [ ] Implementar testes de integração
+- [ ] Adicionar análise de código com lint
+- [ ] Implementar CI/CD pipeline
+
+### 15. Otimizações e Performance
+- [ ] Implementar lazy loading para imagens
+- [ ] Adicionar paginação para posts e comentários
+- [ ] Implementar cache de imagens
+- [ ] Otimizar tamanho do app
+- [ ] Adicionar compressão de imagens
+
+### 16. Funcionalidades Avançadas
+- [ ] Implementar sistema de hashtags
+- [ ] Adicionar localização para posts
+- [ ] Implementar sistema de menções (@)
+- [ ] Adicionar stories em destaque
+- [ ] Implementar sistema de verificações
+- [ ] Adicionar analytics básicos
+
+### 17. Preparação para Deploy
+- [ ] Configurar builds para Android
+- [ ] Configurar builds para iOS
+- [ ] Implementar splash screen
+- [ ] Adicionar ícones do app
+- [ ] Configurar permissões necessárias
+- [ ] Implementar versionamento
+
+### 18. Documentação e Finalização
+- [ ] Criar documentação técnica
+- [ ] Adicionar comentários no código
+- [ ] Criar guia de instalação
+- [ ] Implementar README completo
+- [ ] Adicionar screenshots do app
+- [ ] Criar vídeo demonstrativo

@@ -11,8 +11,50 @@ class PostService {
   final StorageService _storageService = StorageService();
   final UserService _userService = UserService();
   
+  /// Obter todos os posts
+  Future<List<PostModel>> getAllPosts() async {
+    final response = await _client
+        .from('posts')
+        .select('*, users(*)')
+        .order('created_at', ascending: false);
+    
+    return (response as List).map((post) {
+      final userData = post['users'];
+      post['user'] = userData;
+      return PostModel.fromJson(post);
+    }).toList();
+  }
+  
   /// Criar um novo post
-  Future<String> createPost({
+  Future<PostModel> createPost({
+    required String caption,
+    required String imageUrl,
+    String? location,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw Exception('Usuário não autenticado');
+    
+    // Criar o post no banco de dados
+    final response = await _client.from('posts').insert({
+      'user_id': userId,
+      'image_url': imageUrl,
+      'caption': caption,
+      'location': location,
+      'created_at': DateTime.now().toIso8601String(),
+    }).select('*, users(*)').single();
+    
+    // Preparar dados do usuário
+    final userData = response['users'];
+    response['user'] = userData;
+    
+    // Atualizar estatísticas do usuário
+    await _userService.updateUserStats(userId);
+    
+    return PostModel.fromJson(response);
+  }
+  
+  /// Criar um novo post com upload de imagem
+  Future<PostModel> createPostWithImage({
     required File imageFile,
     String? caption,
     String? location,
@@ -29,19 +71,12 @@ class PostService {
       path: imagePath,
     );
     
-    // Criar o post no banco de dados
-    final response = await _client.from('posts').insert({
-      'user_id': userId,
-      'image_url': imageUrl,
-      'caption': caption,
-      'location': location,
-      'created_at': DateTime.now().toIso8601String(),
-    }).select('id').single();
-    
-    // Atualizar estatísticas do usuário
-    await _userService.updateUserStats(userId);
-    
-    return response['id'];
+    // Criar o post usando o método principal
+    return await createPost(
+      caption: caption ?? '',
+      imageUrl: imageUrl,
+      location: location,
+    );
   }
   
   /// Obter posts com paginação

@@ -1,4 +1,4 @@
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Classe singleton para gerenciar a inicialização e acesso ao cliente Supabase
@@ -13,14 +13,15 @@ class SupabaseService {
   
   /// Inicializa o cliente Supabase
   Future<void> initialize() async {
-    // Em uma implementação real, usaríamos dotenv:
-    // await dotenv.load();
-    // final supabaseUrl = dotenv.env['SUPABASE_URL'];
-    // final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+    // Carrega as variáveis de ambiente do arquivo .env
+    await dotenv.load(fileName: ".env");
     
-    // Por enquanto, usaremos valores fixos para demonstração
-    const supabaseUrl = 'https://hbtsnmunidejqpsdinux.supabase.co';
-    const supabaseAnonKey = 'sua_anon_key_aqui'; // Substituir por chave real em produção
+    final supabaseUrl = dotenv.env['SUPABASE_URL'];
+    final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+    
+    if (supabaseUrl == null || supabaseAnonKey == null) {
+      throw Exception('Variáveis SUPABASE_URL e SUPABASE_ANON_KEY são obrigatórias');
+    }
     
     await Supabase.initialize(
       url: supabaseUrl,
@@ -30,4 +31,13 @@ class SupabaseService {
   
   /// Getter para acessar o cliente Supabase
   SupabaseClient get client => Supabase.instance.client;
+  
+  /// Verifica se o Supabase está inicializado
+  bool get isInitialized => url.isNotEmpty && anonKey.isNotEmpty;
+  
+  /// Obtém a URL do Supabase
+  String get url => dotenv.env['SUPABASE_URL'] ?? '';
+  
+  /// Obtém a chave anônima
+  String get anonKey => dotenv.env['SUPABASE_ANON_KEY'] ?? '';
 }

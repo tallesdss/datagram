@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:go_router/go_router.dart';
+import '../providers/providers.dart';
 
-class PostCard extends StatefulWidget {
+class PostCard extends ConsumerStatefulWidget {
   final String postId;
   final String imageUrl;
   final String username;
@@ -30,10 +32,10 @@ class PostCard extends StatefulWidget {
   });
 
   @override
-  State<PostCard> createState() => _PostCardState();
+  ConsumerState<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> {
+class _PostCardState extends ConsumerState<PostCard> {
   late bool _isLiked;
   late bool _isSaved;
   late int _likesCount;
@@ -46,17 +48,65 @@ class _PostCardState extends State<PostCard> {
     _likesCount = widget.likesCount;
   }
 
-  void _toggleLike() {
-    setState(() {
-      _isLiked = !_isLiked;
-      _likesCount += _isLiked ? 1 : -1;
-    });
+  void _toggleLike() async {
+    try {
+      if (_isLiked) {
+        await ref.read(postProvider.notifier).unlikePost(widget.postId);
+      } else {
+        await ref.read(postProvider.notifier).likePost(widget.postId);
+      }
+      
+      setState(() {
+        _isLiked = !_isLiked;
+        _likesCount += _isLiked ? 1 : -1;
+      });
+    } catch (e) {
+      // Mostrar erro para o usuário
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao curtir post: $e')),
+        );
+      }
+    }
   }
 
-  void _toggleSave() {
-    setState(() {
-      _isSaved = !_isSaved;
-    });
+  void _toggleSave() async {
+    try {
+      if (_isSaved) {
+        await ref.read(postProvider.notifier).unsavePost(widget.postId);
+      } else {
+        await ref.read(postProvider.notifier).savePost(widget.postId);
+      }
+      
+      setState(() {
+        _isSaved = !_isSaved;
+      });
+    } catch (e) {
+      // Mostrar erro para o usuário
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao salvar post: $e')),
+        );
+      }
+    }
+  }
+
+  void _sharePost() {
+    // Implementar compartilhamento nativo
+    // Por enquanto, apenas mostrar um diálogo
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Compartilhar'),
+        content: const Text('Funcionalidade de compartilhamento será implementada em breve.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _navigateToPostDetail() {
@@ -137,7 +187,7 @@ class _PostCardState extends State<PostCard> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.send_outlined),
-                      onPressed: () {},
+                      onPressed: _sharePost,
                     ),
                     const Spacer(),
                     IconButton(

@@ -57,6 +57,37 @@ class AuthService {
     );
   }
   
+  /// Reset de senha
+  Future<void> resetPassword(String email) async {
+    await _client.auth.resetPasswordForEmail(email);
+  }
+  
+  /// Atualizar senha
+  Future<void> updatePassword(String newPassword) async {
+    await _client.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
+  }
+  
+  /// Login com Google
+  Future<bool> signInWithGoogle() async {
+    return await _client.auth.signInWithOAuth(OAuthProvider.google);
+  }
+  
+  /// Login com Facebook
+  Future<bool> signInWithFacebook() async {
+    return await _client.auth.signInWithOAuth(OAuthProvider.facebook);
+  }
+  
+  /// Verificar se o usuário está autenticado
+  bool get isAuthenticated => _client.auth.currentUser != null;
+  
+  /// Obter ID do usuário atual
+  String? get currentUserId => _client.auth.currentUser?.id;
+  
+  /// Obter email do usuário atual
+  String? get currentUserEmail => _client.auth.currentUser?.email;
+  
   /// Logout
   Future<void> signOut() async {
     await _client.auth.signOut();

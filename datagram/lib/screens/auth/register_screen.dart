@@ -32,6 +32,54 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  Future<void> _registerWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await _authService.signInWithGoogle();
+      if (mounted) {
+        context.go('/home');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Erro ao fazer cadastro com Google: ${e.toString()}';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _registerWithFacebook() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await _authService.signInWithFacebook();
+      if (mounted) {
+        context.go('/home');
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Erro ao fazer cadastro com Facebook: ${e.toString()}';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -216,6 +264,47 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             'Criar conta',
                             style: TextStyle(fontSize: 16),
                           ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Divisor
+                  const Row(
+                    children: [
+                      Expanded(child: Divider()),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('OU'),
+                      ),
+                      Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Botões de autenticação social
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _isLoading ? null : _registerWithGoogle,
+                          icon: const Icon(Icons.login, size: 20),
+                          label: const Text('Google'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _isLoading ? null : _registerWithFacebook,
+                          icon: const Icon(Icons.facebook, size: 20),
+                          label: const Text('Facebook'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   

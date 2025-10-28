@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../services/services.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -16,8 +17,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   String? _errorMessage;
   bool _resetSent = false;
 
-  // Será usado quando implementarmos a recuperação de senha real
-  // final AuthService _authService = AuthService();
+  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -34,11 +34,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
-      // Implementar quando o Supabase estiver configurado
-      // await _authService.resetPassword(_emailController.text.trim());
-      
-      // Por enquanto, apenas simular o envio
-      await Future.delayed(const Duration(seconds: 1));
+      await _authService.resetPassword(_emailController.text.trim());
       
       if (mounted) {
         setState(() {

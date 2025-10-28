@@ -2,6 +2,148 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
 import '../data/mock_data.dart';
+import '../services/services.dart';
+
+// Notifier para gerenciar posts com backend real
+class PostNotifier extends StateNotifier<AsyncValue<List<PostModel>>> {
+  PostNotifier(this._postService) : super(const AsyncValue.loading()) {
+    _loadPosts();
+  }
+
+  final PostService _postService;
+
+  Future<void> _loadPosts() async {
+    try {
+      state = const AsyncValue.loading();
+      final posts = await _postService.getAllPosts();
+      state = AsyncValue.data(posts);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
+  Future<void> refreshPosts() async {
+    await _loadPosts();
+  }
+
+  Future<void> likePost(String postId) async {
+    try {
+      await _postService.likePost(postId);
+      // Atualizar estado local
+      state.whenData((posts) {
+        final updatedPosts = posts.map((post) {
+          if (post.id == postId) {
+            return post.copyWith(
+              isLiked: true,
+              likesCount: post.likesCount + 1,
+            );
+          }
+          return post;
+        }).toList();
+        state = AsyncValue.data(updatedPosts);
+      });
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> unlikePost(String postId) async {
+    try {
+      await _postService.unlikePost(postId);
+      // Atualizar estado local
+      state.whenData((posts) {
+        final updatedPosts = posts.map((post) {
+          if (post.id == postId) {
+            return post.copyWith(
+              isLiked: false,
+              likesCount: post.likesCount - 1,
+            );
+          }
+          return post;
+        }).toList();
+        state = AsyncValue.data(updatedPosts);
+      });
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> savePost(String postId) async {
+    try {
+      await _postService.savePost(postId);
+      // Atualizar estado local
+      state.whenData((posts) {
+        final updatedPosts = posts.map((post) {
+          if (post.id == postId) {
+            return post.copyWith(isSaved: true);
+          }
+          return post;
+        }).toList();
+        state = AsyncValue.data(updatedPosts);
+      });
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> unsavePost(String postId) async {
+    try {
+      await _postService.unsavePost(postId);
+      // Atualizar estado local
+      state.whenData((posts) {
+        final updatedPosts = posts.map((post) {
+          if (post.id == postId) {
+            return post.copyWith(isSaved: false);
+          }
+          return post;
+        }).toList();
+        state = AsyncValue.data(updatedPosts);
+      });
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> createPost({
+    required String caption,
+    required String imageUrl,
+    String? location,
+  }) async {
+    try {
+      final newPost = await _postService.createPost(
+        caption: caption,
+        imageUrl: imageUrl,
+        location: location,
+      );
+      
+      // Adicionar novo post ao estado
+      state.whenData((posts) {
+        final updatedPosts = [newPost, ...posts];
+        state = AsyncValue.data(updatedPosts);
+      });
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> deletePost(String postId) async {
+    try {
+      await _postService.deletePost(postId);
+      // Remover post do estado
+      state.whenData((posts) {
+        final updatedPosts = posts.where((post) => post.id != postId).toList();
+        state = AsyncValue.data(updatedPosts);
+      });
+    } catch (error) {
+      rethrow;
+    }
+  }
+}
+
+// Provider principal para posts com backend real
+final postProvider = StateNotifierProvider<PostNotifier, AsyncValue<List<PostModel>>>((ref) {
+  return PostNotifier(PostService());
+});
 
 // Provider para todos os posts
 final postsProvider = Provider<List<PostModel>>((ref) {
