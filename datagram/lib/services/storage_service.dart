@@ -86,29 +86,6 @@ class StorageService {
     final fileName = '$path$fileExtension';
     final fullPath = '$userId/$fileName';
     
-    // Determinar content-type baseado na extensão
-    String contentType;
-    switch (fileExtension) {
-      case 'jpg':
-      case 'jpeg':
-        contentType = 'image/jpeg';
-        break;
-      case 'png':
-        contentType = 'image/png';
-        break;
-      case 'gif':
-        contentType = 'image/gif';
-        break;
-      case 'mp4':
-        contentType = 'video/mp4';
-        break;
-      case 'mov':
-        contentType = 'video/quicktime';
-        break;
-      default:
-        contentType = 'application/octet-stream';
-    }
-    
     // Upload do arquivo
     await _client.storage.from(bucket).upload(
       fullPath,
@@ -116,7 +93,6 @@ class StorageService {
       fileOptions: FileOptions(
         cacheControl: '3600',
         upsert: true,
-        contentType: contentType,
       ),
     );
     
@@ -145,19 +121,30 @@ class StorageService {
     final fileName = '$path.jpg'; // Assumir JPG por padrão
     final fullPath = '$userId/$fileName';
     
-    // Upload dos bytes
-    await _client.storage.from(bucket).uploadBinary(
-      fullPath,
-      bytes,
-      fileOptions: FileOptions(
-        cacheControl: '3600',
-        upsert: true,
-        contentType: 'image/jpeg',
-      ),
-    );
+    // Criar arquivo temporário
+    final tempDir = Directory.systemTemp;
+    final tempFile = File('${tempDir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.jpg');
+    await tempFile.writeAsBytes(bytes);
     
-    // Retornar URL pública do arquivo
-    return getPublicUrl(bucket, fullPath);
+    try {
+      // Upload do arquivo temporário
+      await _client.storage.from(bucket).upload(
+        fullPath,
+        tempFile,
+        fileOptions: FileOptions(
+          cacheControl: '3600',
+          upsert: true,
+        ),
+      );
+      
+      // Retornar URL pública do arquivo
+      return getPublicUrl(bucket, fullPath);
+    } finally {
+      // Limpar arquivo temporário
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+    }
   }
   
   /// Upload de imagem de post
