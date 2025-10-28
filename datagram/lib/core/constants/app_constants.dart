@@ -1,8 +1,12 @@
 class AppConstants {
-  // URLs para imagens mock
-  static const String placeholderImageUrl = 'https://picsum.photos/400/400';
-  static const String profileImageUrl = 'https://picsum.photos/200/200';
-  static const String storyImageUrl = 'https://picsum.photos/300/500';
+  // URLs para imagens mock - usando URLs mais confiáveis
+  static const String placeholderImageUrl = 'https://via.placeholder.com/400x400/cccccc/666666?text=Image';
+  static const String profileImageUrl = 'https://via.placeholder.com/200x200/cccccc/666666?text=Profile';
+  static const String storyImageUrl = 'https://via.placeholder.com/300x500/cccccc/666666?text=Story';
+  
+  // URLs de fallback para quando as imagens principais falharem
+  static const String fallbackImageUrl = 'https://via.placeholder.com/400x400/f0f0f0/999999?text=No+Image';
+  static const String fallbackProfileUrl = 'https://via.placeholder.com/200x200/f0f0f0/999999?text=User';
   
   // Configurações de UI
   static const double defaultPadding = 16.0;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../providers/providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -144,6 +145,29 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('Sobre'),
             onTap: () {
               _showAboutDialog(context);
+            },
+          ),
+          
+          const Divider(),
+          
+          // Seção de desenvolvimento
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'DESENVOLVIMENTO',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.storage),
+            title: const Text('Testar Supabase Storage'),
+            subtitle: const Text('Verificar conexão e funcionalidade'),
+            onTap: () {
+              context.push('/test-storage');
             },
           ),
           

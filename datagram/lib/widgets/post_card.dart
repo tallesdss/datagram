@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:go_router/go_router.dart';
 import '../providers/providers.dart';
+import 'safe_network_image.dart';
 
 class PostCard extends ConsumerStatefulWidget {
   final String postId;
@@ -125,10 +125,14 @@ class _PostCardState extends ConsumerState<PostCard> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage: CachedNetworkImageProvider(widget.userImageUrl),
-                ),
+                  CircleAvatar(
+                    radius: 16,
+                    child: SafeProfileImage(
+                      imageUrl: widget.userImageUrl,
+                      radius: 16,
+                      fallbackText: widget.username.isNotEmpty ? widget.username[0] : 'U',
+                    ),
+                  ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -149,19 +153,9 @@ class _PostCardState extends ConsumerState<PostCard> {
             onDoubleTap: _toggleLike,
             child: AspectRatio(
               aspectRatio: 1,
-              child: CachedNetworkImage(
+              child: SafePostImage(
                 imageUrl: widget.imageUrl,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  color: Colors.grey[300],
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.error),
-                ),
               ),
             ),
           ),

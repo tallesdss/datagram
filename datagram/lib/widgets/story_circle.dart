@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'safe_network_image.dart';
 
 class StoryCircle extends StatelessWidget {
   final String username;
@@ -43,8 +43,10 @@ class StoryCircle extends StatelessWidget {
                 color: Colors.white,
               ),
               padding: const EdgeInsets.all(2),
-              child: CircleAvatar(
-                backgroundImage: CachedNetworkImageProvider(imageUrl),
+              child: SafeProfileImage(
+                imageUrl: imageUrl,
+                radius: 28,
+                fallbackText: username.isNotEmpty ? username[0] : 'S',
               ),
             ),
           ),

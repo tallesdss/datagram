@@ -18,6 +18,7 @@ import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/register_screen.dart';
 import '../../screens/auth/forgot_password_screen.dart';
 import '../../screens/auth/onboarding_screen.dart';
+import '../../test_storage.dart';
 import '../../providers/providers.dart';
 
 // Provider para o router
@@ -147,6 +148,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/direct-messages',
         builder: (context, state) => const DirectMessagesScreen(),
+      ),
+      
+      // Rota de teste de storage
+      GoRoute(
+        path: '/test-storage',
+        builder: (context, state) => const TestStorageWidget(),
       ),
     ],
   );
