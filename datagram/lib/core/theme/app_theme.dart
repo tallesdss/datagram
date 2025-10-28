@@ -11,16 +11,22 @@ class AppTheme {
   // Cores de fundo
   static const Color lightBackground = Color(0xFFFFFFFF);
   static const Color darkBackground = Color(0xFF000000);
+  static const Color backgroundColor = Color(0xFFFAFAFA);
   
   // Cores de texto
   static const Color lightTextPrimary = Color(0xFF262626);
   static const Color lightTextSecondary = Color(0xFF8E8E8E);
   static const Color darkTextPrimary = Color(0xFFFFFFFF);
   static const Color darkTextSecondary = Color(0xFF8E8E8E);
+  static const Color textColor = Color(0xFF262626);
   
   // Cores de borda
   static const Color lightBorder = Color(0xFFDBDBDB);
   static const Color darkBorder = Color(0xFF262626);
+  static const Color borderColor = Color(0xFFDBDBDB);
+  
+  // Cores de card
+  static const Color cardColor = Color(0xFFFFFFFF);
 
   static ThemeData get lightTheme {
     return ThemeData(

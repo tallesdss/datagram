@@ -1,249 +1,464 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import '../../providers/providers.dart';
+import '../../providers/post_provider.dart';
+import '../../core/theme/app_theme.dart';
 
-class CreatePostScreen extends ConsumerStatefulWidget {
-  const CreatePostScreen({super.key});
+/// Provider para gerenciar o estado da criação de post
+final createPostProvider = StateNotifierProvider<CreatePostNotifier, CreatePostState>((ref) {
+  return CreatePostNotifier();
+});
 
-  @override
-  ConsumerState<CreatePostScreen> createState() => _CreatePostScreenState();
+/// Estado da criação de post
+class CreatePostState {
+  final File? selectedImage;
+  final String caption;
+  final String? location;
+  final bool isLoading;
+  final String? error;
+
+  const CreatePostState({
+    this.selectedImage,
+    this.caption = '',
+    this.location,
+    this.isLoading = false,
+    this.error,
+  });
+
+  CreatePostState copyWith({
+    File? selectedImage,
+    String? caption,
+    String? location,
+    bool? isLoading,
+    String? error,
+  }) {
+    return CreatePostState(
+      selectedImage: selectedImage ?? this.selectedImage,
+      caption: caption ?? this.caption,
+      location: location ?? this.location,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
 }
 
-class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
-  final TextEditingController _captionController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
-  File? _imageFile;
-  bool _isLoading = false;
-  final ImagePicker _picker = ImagePicker();
+/// Notifier para gerenciar o estado da criação de post
+class CreatePostNotifier extends StateNotifier<CreatePostState> {
+  final ImagePicker _imagePicker = ImagePicker();
 
-  @override
-  void dispose() {
-    _captionController.dispose();
-    _locationController.dispose();
-    super.dispose();
-  }
+  CreatePostNotifier() : super(const CreatePostState());
 
-  Future<void> _pickImage(ImageSource source) async {
+  /// Selecionar imagem da galeria
+  Future<void> pickImageFromGallery() async {
     try {
-      final pickedFile = await _picker.pickImage(source: source);
-      if (pickedFile != null && mounted) {
-        setState(() {
-          _imageFile = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao selecionar imagem: $e')),
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      
+      if (image != null) {
+        state = state.copyWith(
+          selectedImage: File(image.path),
+          error: null,
         );
       }
+    } catch (e) {
+      state = state.copyWith(error: 'Erro ao selecionar imagem: $e');
     }
   }
 
-  void _showImageSourceOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.camera_alt),
-            title: const Text('Câmera'),
-            onTap: () {
-              Navigator.pop(context);
-              _pickImage(ImageSource.camera);
-            },
+  /// Selecionar imagem da câmera
+  Future<void> pickImageFromCamera() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      
+      if (image != null) {
+        state = state.copyWith(
+          selectedImage: File(image.path),
+          error: null,
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(error: 'Erro ao capturar imagem: $e');
+    }
+  }
+
+  /// Atualizar legenda
+  void updateCaption(String caption) {
+    state = state.copyWith(caption: caption);
+  }
+
+  /// Atualizar localização
+  void updateLocation(String? location) {
+    state = state.copyWith(location: location);
+  }
+
+  /// Remover imagem selecionada
+  void removeImage() {
+    state = state.copyWith(selectedImage: null);
+  }
+
+  /// Criar post
+  Future<void> createPost(WidgetRef ref) async {
+    if (state.selectedImage == null) {
+      state = state.copyWith(error: 'Selecione uma imagem para postar');
+      return;
+    }
+
+    if (state.caption.trim().isEmpty) {
+      state = state.copyWith(error: 'Digite uma legenda para o post');
+      return;
+    }
+
+    try {
+      state = state.copyWith(isLoading: true, error: null);
+
+      await ref.read(postProvider.notifier).createPostWithImage(
+        imageFile: state.selectedImage!,
+        caption: state.caption.trim(),
+        location: state.location?.trim(),
+      );
+
+      // Limpar estado após sucesso
+      state = const CreatePostState();
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Erro ao criar post: $e',
+      );
+    }
+  }
+
+  /// Limpar erro
+  void clearError() {
+    state = state.copyWith(error: null);
+  }
+}
+
+/// Tela para criar um novo post
+class CreatePostScreen extends ConsumerWidget {
+  const CreatePostScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(createPostProvider);
+    final notifier = ref.read(createPostProvider.notifier);
+
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: AppTheme.backgroundColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: AppTheme.textColor),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Nova Postagem',
+          style: TextStyle(
+            color: AppTheme.textColor,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
-          ListTile(
-            leading: const Icon(Icons.photo_library),
-            title: const Text('Galeria'),
-            onTap: () {
-              Navigator.pop(context);
-              _pickImage(ImageSource.gallery);
-            },
+        ),
+        actions: [
+          TextButton(
+            onPressed: state.isLoading || state.selectedImage == null
+                ? null
+                : () => notifier.createPost(ref),
+            child: Text(
+              'Compartilhar',
+              style: TextStyle(
+                color: state.isLoading || state.selectedImage == null
+                    ? AppTheme.textColor.withOpacity(0.5)
+                    : AppTheme.primaryColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Seletor de imagem
+          _buildImageSelector(context, state, notifier),
+          
+          // Formulário de post
+          Expanded(
+            child: _buildPostForm(context, state, notifier),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _createPost() async {
-    if (_imageFile == null) return;
-    
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // Criar o post com upload da imagem
-      await ref.read(postProvider.notifier).createPostWithImage(
-        imageFile: _imageFile!,
-        caption: _captionController.text.trim(),
-        location: _locationController.text.trim().isEmpty 
-            ? null 
-            : _locationController.text.trim(),
-      );
-      
-      if (!mounted) return;
-      
-      // Mostrar mensagem de sucesso
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Post criado com sucesso!')),
-      );
-      
-      // Voltar para a tela anterior
-      Navigator.pop(context);
-      
-    } catch (e) {
-      if (!mounted) return;
-      
-      // Mostrar mensagem de erro
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao criar post: $e')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final currentUser = ref.watch(currentUserProvider);
-    
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Novo Post'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
+  /// Widget para seleção de imagem
+  Widget _buildImageSelector(
+    BuildContext context,
+    CreatePostState state,
+    CreatePostNotifier notifier,
+  ) {
+    return Container(
+      height: 300,
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.borderColor,
+          width: 1,
         ),
-        actions: [
-          if (_imageFile != null)
-            TextButton(
-              onPressed: _isLoading ? null : _createPost,
-              child: _isLoading 
-                ? const SizedBox(
-                    width: 20, 
-                    height: 20, 
-                    child: CircularProgressIndicator(strokeWidth: 2)
-                  )
-                : const Text('Compartilhar'),
-            ),
-        ],
       ),
-      body: _imageFile == null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.add_photo_alternate, size: 100, color: Colors.grey),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Selecione uma imagem para o seu post',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: _showImageSourceOptions,
-                    child: const Text('Selecionar Imagem'),
-                  ),
-                ],
-              ),
-            )
-          : ListView(
+      child: state.selectedImage != null
+          ? Stack(
               children: [
-                // Header com informações do usuário
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage: NetworkImage(currentUser?.profileImageUrl ?? ''),
-                        radius: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        currentUser?.username ?? 'Usuário',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // Imagem selecionada
-                AspectRatio(
-                  aspectRatio: 1,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
                   child: Image.file(
-                    _imageFile!,
+                    state.selectedImage!,
+                    width: double.infinity,
+                    height: double.infinity,
                     fit: BoxFit.cover,
                   ),
                 ),
-                
-                // Campo de legenda
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    controller: _captionController,
-                    decoration: const InputDecoration(
-                      hintText: 'Escreva uma legenda...',
-                      border: InputBorder.none,
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
                     ),
-                    maxLines: 3,
-                  ),
-                ),
-                
-                const Divider(),
-                
-                // Campo de localização
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: TextField(
-                    controller: _locationController,
-                    decoration: const InputDecoration(
-                      hintText: 'Adicionar localização',
-                      border: InputBorder.none,
-                      icon: Icon(Icons.location_on_outlined),
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: notifier.removeImage,
                     ),
                   ),
                 ),
-                
-                const Divider(),
-                
-                // Opções adicionais
-                ListTile(
-                  leading: const Icon(Icons.person_add_outlined),
-                  title: const Text('Marcar pessoas'),
-                  onTap: () {
-                    // Implementar funcionalidade de marcar pessoas
-                  },
+              ],
+            )
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.add_photo_alternate_outlined,
+                  size: 64,
+                  color: AppTheme.textColor.withOpacity(0.5),
                 ),
-                
-                ListTile(
-                  leading: const Icon(Icons.label_outline),
-                  title: const Text('Adicionar hashtags'),
-                  onTap: () {
-                    // Implementar funcionalidade de adicionar hashtags
-                  },
+                const SizedBox(height: 16),
+                Text(
+                  'Adicionar Foto',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textColor.withOpacity(0.7),
+                  ),
                 ),
-                
-                ListTile(
-                  leading: const Icon(Icons.music_note_outlined),
-                  title: const Text('Adicionar música'),
-                  onTap: () {
-                    // Implementar funcionalidade de adicionar música
-                  },
+                const SizedBox(height: 8),
+                Text(
+                  'Escolha uma foto da galeria ou tire uma nova',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textColor.withOpacity(0.5),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildImageSourceButton(
+                      context,
+                      'Galeria',
+                      Icons.photo_library_outlined,
+                      () => notifier.pickImageFromGallery(),
+                    ),
+                    _buildImageSourceButton(
+                      context,
+                      'Câmera',
+                      Icons.camera_alt_outlined,
+                      () => notifier.pickImageFromCamera(),
+                    ),
+                  ],
                 ),
               ],
             ),
+    );
+  }
+
+  /// Botão para fonte de imagem
+  Widget _buildImageSourceButton(
+    BuildContext context,
+    String label,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  /// Formulário do post
+  Widget _buildPostForm(
+    BuildContext context,
+    CreatePostState state,
+    CreatePostNotifier notifier,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Campo de legenda
+          Text(
+            'Legenda',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            onChanged: notifier.updateCaption,
+            maxLines: 4,
+            maxLength: 2200,
+            decoration: InputDecoration(
+              hintText: 'Escreva uma legenda...',
+              hintStyle: TextStyle(
+                color: AppTheme.textColor.withOpacity(0.5),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: AppTheme.primaryColor),
+              ),
+              filled: true,
+              fillColor: AppTheme.cardColor,
+              contentPadding: const EdgeInsets.all(12),
+            ),
+            style: const TextStyle(color: AppTheme.textColor),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Campo de localização (opcional)
+          Text(
+            'Localização (opcional)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            onChanged: notifier.updateLocation,
+            decoration: InputDecoration(
+              hintText: 'Adicionar localização...',
+              hintStyle: TextStyle(
+                color: AppTheme.textColor.withOpacity(0.5),
+              ),
+              prefixIcon: Icon(
+                Icons.location_on_outlined,
+                color: AppTheme.textColor.withOpacity(0.5),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: AppTheme.primaryColor),
+              ),
+              filled: true,
+              fillColor: AppTheme.cardColor,
+              contentPadding: const EdgeInsets.all(12),
+            ),
+            style: const TextStyle(color: AppTheme.textColor),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Mensagem de erro
+          if (state.error != null) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      state.error!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.red),
+                    onPressed: notifier.clearError,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
+          // Indicador de carregamento
+          if (state.isLoading) ...[
+            const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Center(
+              child: Text(
+                'Criando post...',
+                style: TextStyle(
+                  color: AppTheme.textColor,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
