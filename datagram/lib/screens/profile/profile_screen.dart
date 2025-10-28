@@ -26,7 +26,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showProfileMenu(BuildContext context) {
+  void _showProfileMenu(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Column(
@@ -49,24 +49,52 @@ class ProfileScreen extends ConsumerWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.qr_code),
-            title: const Text('Código QR'),
-            onTap: () {
-              Navigator.pop(context);
-              // Mostrar código QR
-            },
-          ),
-          ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Sair'),
             onTap: () {
               Navigator.pop(context);
-              // Implementar logout
+              _showLogoutConfirmation(context, ref);
             },
           ),
         ],
       ),
     );
+  }
+
+  void _showLogoutConfirmation(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Logout'),
+        content: const Text('Tem certeza que deseja sair da sua conta?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _performLogout(ref);
+            },
+            child: const Text(
+              'Sair',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _performLogout(WidgetRef ref) async {
+    try {
+      await ref.read(authProvider.notifier).signOut();
+      // O provider já atualiza o estado automaticamente
+    } catch (e) {
+      // Em caso de erro, mostrar mensagem
+      // O erro será tratado pelo provider
+    }
   }
 
   @override
@@ -89,7 +117,7 @@ class ProfileScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
-              _showProfileMenu(context);
+              _showProfileMenu(context, ref);
             },
           ),
         ],
