@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/story_circle.dart';
 import '../../widgets/post_card.dart';
+import '../../providers/providers.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -13,13 +14,45 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final stories = ref.watch(sortedStoriesProvider);
+    final posts = ref.watch(sortedPostsProvider);
+    final unreadNotifications = ref.watch(unreadNotificationsProvider);
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Datagram'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_outline),
-            onPressed: () {},
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.favorite_outline),
+                onPressed: () {},
+              ),
+              if (unreadNotifications > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '$unreadNotifications',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
           IconButton(
             icon: const Icon(Icons.send_outlined),
@@ -29,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          // Simular refresh
+          // Simular refresh - em uma implementação real, aqui chamaríamos os providers para recarregar os dados
           await Future.delayed(const Duration(seconds: 1));
         },
         child: CustomScrollView(
@@ -41,14 +74,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  itemCount: 10,
+                  itemCount: stories.length,
                   itemBuilder: (context, index) {
+                    final story = stories[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: StoryCircle(
-                        username: 'usuario_$index',
-                        imageUrl: 'https://picsum.photos/200/200?random=$index',
-                        isViewed: false,
+                        username: story.user.username,
+                        imageUrl: story.user.profileImageUrl,
+                        isViewed: story.isViewed,
+                        onTap: () {
+                          // Navegar para o visualizador de stories
+                          // Navigator.push(context, ...);
+                        },
                       ),
                     );
                   },
@@ -60,19 +98,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
+                  final post = posts[index];
                   return PostCard(
-                    postId: 'post_$index',
-                    imageUrl: 'https://picsum.photos/400/400?random=${index + 100}',
-                    username: 'usuario_$index',
-                    userImageUrl: 'https://picsum.photos/200/200?random=$index',
-                    caption: 'Este é um post de exemplo #$index',
-                    likesCount: (index + 1) * 10,
-                    commentsCount: (index + 1) * 3,
-                    timestamp: DateTime.now().subtract(Duration(hours: index)),
-                    isLiked: index % 3 == 0,
+                    postId: post.id,
+                    imageUrl: post.imageUrl,
+                    username: post.user.username,
+                    userImageUrl: post.user.profileImageUrl,
+                    caption: post.caption,
+                    likesCount: post.likesCount,
+                    commentsCount: post.commentsCount,
+                    timestamp: post.timestamp,
+                    isLiked: post.isLiked,
+                    isSaved: post.isSaved,
                   );
                 },
-                childCount: 20,
+                childCount: posts.length,
               ),
             ),
           ],
