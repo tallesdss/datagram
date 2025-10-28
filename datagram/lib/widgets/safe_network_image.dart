@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -25,23 +26,42 @@ class SafeNetworkImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Se a URL estiver vazia ou inválida, mostrar widget de erro
-    if (imageUrl.isEmpty || Uri.tryParse(imageUrl)?.hasAbsolutePath != true) {
+    if (imageUrl.isEmpty) {
       return _buildErrorWidget();
     }
 
-    Widget imageWidget = CachedNetworkImage(
-      imageUrl: imageUrl,
-      width: width,
-      height: height,
-      fit: fit,
-      placeholder: placeholder != null ? (context, url) => placeholder! : (context, url) => _buildPlaceholder(),
-      errorWidget: errorWidget != null ? (context, url, error) => errorWidget! : (context, url, error) => _buildErrorWidget(),
-      // Configurações adicionais para melhor performance
-      memCacheWidth: width?.toInt(),
-      memCacheHeight: height?.toInt(),
-      maxWidthDiskCache: 1000,
-      maxHeightDiskCache: 1000,
-    );
+    Widget imageWidget;
+
+    // Verificar se é uma URL de arquivo local ou temporária
+    if (imageUrl.startsWith('file://') || imageUrl.startsWith('temp://')) {
+      // Para URLs de arquivo local, usar Image.file
+      final filePath = imageUrl.replaceFirst('file://', '').replaceFirst('temp://', '');
+      imageWidget = Image.file(
+        File(filePath),
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+      );
+    } else if (Uri.tryParse(imageUrl)?.hasAbsolutePath == true) {
+      // Para URLs de rede válidas, usar CachedNetworkImage
+      imageWidget = CachedNetworkImage(
+        imageUrl: imageUrl,
+        width: width,
+        height: height,
+        fit: fit,
+        placeholder: placeholder != null ? (context, url) => placeholder! : (context, url) => _buildPlaceholder(),
+        errorWidget: errorWidget != null ? (context, url, error) => errorWidget! : (context, url, error) => _buildErrorWidget(),
+        // Configurações adicionais para melhor performance
+        memCacheWidth: width?.toInt(),
+        memCacheHeight: height?.toInt(),
+        maxWidthDiskCache: 1000,
+        maxHeightDiskCache: 1000,
+      );
+    } else {
+      // Para URLs inválidas, mostrar widget de erro
+      return _buildErrorWidget();
+    }
 
     // Aplicar border radius se especificado
     if (borderRadius != null) {

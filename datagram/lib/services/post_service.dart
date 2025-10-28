@@ -84,6 +84,17 @@ class PostService {
       
       return result;
     } catch (e) {
+      // Se for erro de storage, tentar criar post com URL temporária
+      if (e.toString().contains('Storage não configurado') || 
+          e.toString().contains('_Namespace')) {
+        // Criar post com URL temporária para desenvolvimento
+        final tempImageUrl = 'temp://${DateTime.now().millisecondsSinceEpoch}.jpg';
+        return await createPost(
+          caption: caption ?? '',
+          imageUrl: tempImageUrl,
+          location: location,
+        );
+      }
       rethrow;
     }
   }

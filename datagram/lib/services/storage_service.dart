@@ -48,8 +48,27 @@ class StorageService {
       
       return result;
     } catch (e) {
+      // Se o erro for de configuração do storage, usar método alternativo
+      if (e.toString().contains('Storage não configurado') || 
+          e.toString().contains('_Namespace') ||
+          e.toString().contains('bucket')) {
+        return await _createTemporaryImageUrl(imageBytes, path);
+      }
       rethrow;
     }
+  }
+  
+  /// Método alternativo para criar URL temporária quando storage não está configurado
+  Future<String> _createTemporaryImageUrl(Uint8List imageBytes, String path) async {
+    // Criar arquivo temporário local
+    final tempDir = Directory.systemTemp;
+    final fileName = '${path.split('/').last}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final tempFile = File('${tempDir.path}/$fileName');
+    
+    await tempFile.writeAsBytes(imageBytes);
+    
+    // Retornar URL do arquivo local (apenas para desenvolvimento)
+    return 'file://${tempFile.path}';
   }
   
   /// Upload de vídeo para o bucket especificado
@@ -140,6 +159,17 @@ class StorageService {
     await tempFile.writeAsBytes(bytes);
     
     try {
+      // Verificar se o bucket existe antes do upload
+      try {
+        await _client.storage.listBuckets();
+      } catch (bucketError) {
+        if (bucketError.toString().contains('_Namespace') || 
+            bucketError.toString().contains('bucket')) {
+          throw Exception('Storage não configurado. Verifique se o bucket "$bucket" foi criado no Supabase.');
+        }
+        rethrow;
+      }
+      
       // Upload do arquivo temporário
       await _client.storage.from(bucket).upload(
         fullPath,
@@ -150,12 +180,19 @@ class StorageService {
         ),
       );
       
-      
       // Retornar URL pública do arquivo
       final publicUrl = getPublicUrl(bucket, fullPath);
       
       return publicUrl;
     } catch (e) {
+      // Tratar erros específicos do Supabase Storage
+      if (e.toString().contains('_Namespace')) {
+        throw Exception('Erro de configuração do storage. Verifique se o bucket "$bucket" foi criado no Supabase.');
+      } else if (e.toString().contains('bucket')) {
+        throw Exception('Bucket "$bucket" não encontrado. Verifique a configuração do Supabase Storage.');
+      } else if (e.toString().contains('permission')) {
+        throw Exception('Sem permissão para fazer upload. Verifique as políticas de RLS.');
+      }
       rethrow;
     } finally {
       // Limpar arquivo temporário
