@@ -14,7 +14,7 @@ class SupabaseService {
   /// Inicializa o cliente Supabase
   Future<void> initialize() async {
     // Carrega as variáveis de ambiente do arquivo .env
-    await dotenv.load(fileName: ".env");
+    await dotenv.load(fileName: "assets/.env");
     
     final supabaseUrl = dotenv.env['SUPABASE_URL'];
     final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];

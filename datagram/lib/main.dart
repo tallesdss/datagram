@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -10,7 +10,7 @@ import 'providers/auth_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Inicializar Supabase
+  // Inicializar Supabase (que também carrega as variáveis de ambiente)
   await SupabaseService().initialize();
   
   runApp(
