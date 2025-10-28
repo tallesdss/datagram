@@ -1,9 +1,10 @@
 # Plano de Conclusão do Projeto Datagram
 
 ## 📊 Status Geral do Projeto
-- **Progresso estimado**: ~90% do projeto base implementado
+- **Progresso estimado**: ~85% do projeto base implementado
 - **Análise de código**: ✅ Sem problemas encontrados (`flutter analyze` passou)
 - **Backend Supabase**: ✅ Completamente configurado com todas as tabelas
+- **Funcionalidades críticas pendentes**: Sistema de Atividades e Reels (apenas placeholders)
 
 ---
 
@@ -130,14 +131,14 @@
 - ✅ Upload e edição de foto de perfil (ImagePicker integrado)
 
 #### 5. Sistema de Atividades ⚠️
-- ⚠️ Finalizar tela de atividades (`activity_screen.dart`) - Estrutura básica implementada
+- ⚠️ Finalizar tela de atividades (`activity_screen.dart`) - Apenas estrutura básica (placeholder)
 - ✅ Implementar notificações de curtidas (NotificationService)
 - ✅ Adicionar notificações de comentários (NotificationService)
 - ✅ Implementar notificações de seguidores (NotificationService)
 - ✅ Adicionar notificações de stories (NotificationService)
 
 #### 6. Sistema de Reels ⚠️
-- ⚠️ Finalizar implementação da tela de reels (`reels_screen.dart`) - Estrutura básica implementada
+- ⚠️ Finalizar implementação da tela de reels (`reels_screen.dart`) - Apenas estrutura básica (placeholder)
 - [ ] Implementar player de vídeo vertical
 - [ ] Adicionar controles de reprodução
 - [ ] Sistema de curtidas e comentários para reels
@@ -232,8 +233,8 @@
 
 ### **Média Prioridade**
 1. ✅ Edição de perfil e sistema social - CONCLUÍDO
-2. ⚠️ Sistema de atividades - Parcialmente implementado
-3. ⚠️ Sistema de reels - Estrutura básica implementada
+2. ⚠️ Sistema de atividades - Apenas estrutura básica (placeholder)
+3. ⚠️ Sistema de reels - Apenas estrutura básica (placeholder)
 4. ✅ Busca avançada e configurações - CONCLUÍDO
 
 ### **Baixa Prioridade (Nice to Have)**
@@ -244,8 +245,35 @@
 
 ---
 
+## 🚨 **ITENS QUE PRECISAM SER IMPLEMENTADOS**
+
+### **Prioridade CRÍTICA - Funcionalidades Básicas Pendentes**
+
+#### 1. Sistema de Atividades (activity_screen.dart)
+- [ ] **IMPLEMENTAR**: Lista de notificações em tempo real
+- [ ] **IMPLEMENTAR**: Interface para visualizar curtidas, comentários e seguidores
+- [ ] **IMPLEMENTAR**: Sistema de marcar notificações como lidas
+- [ ] **IMPLEMENTAR**: Navegação para posts/comentários específicos
+
+#### 2. Sistema de Reels (reels_screen.dart)
+- [ ] **IMPLEMENTAR**: Player de vídeo vertical (video_player)
+- [ ] **IMPLEMENTAR**: Controles de reprodução (play/pause, volume)
+- [ ] **IMPLEMENTAR**: Sistema de curtidas e comentários para reels
+- [ ] **IMPLEMENTAR**: Funcionalidade de criação de reels
+- [ ] **IMPLEMENTAR**: Scroll vertical entre reels
+- [ ] **IMPLEMENTAR**: Indicadores de progresso
+
+### **Status Atual das Telas**
+- ✅ **Completamente Implementadas**: Login, Registro, Home, Perfil, Busca, Criação de Posts, Stories, Mensagens, Edição de Perfil, Configurações
+- ⚠️ **Apenas Placeholder**: Atividades, Reels (precisam implementação completa)
+
+---
+
 ## ⏱️ Estimativa de Tempo
-- **Fase 1-3 (MVP Completo)**: ✅ CONCLUÍDO
+- **Fase 1-3 (MVP Completo)**: ✅ CONCLUÍDO (exceto Atividades e Reels)
+- **Implementação das Funcionalidades Pendentes**: 1-2 semanas
+  - Sistema de Atividades: 3-4 dias
+  - Sistema de Reels: 4-5 dias
 - **Fase 4-6 (Versão Completa)**: 1-2 semanas adicionais
 - **Fase 7-9 (Polimento e Deploy)**: 1-2 semanas adicionais
 

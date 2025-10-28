@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../providers/post_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
 
 /// Provider para gerenciar o estado da criação de post
@@ -109,7 +110,7 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
   }
 
   /// Criar post
-  Future<void> createPost(WidgetRef ref) async {
+  Future<void> createPost(WidgetRef ref, BuildContext context) async {
     if (state.selectedImageBytes == null) {
       state = state.copyWith(error: 'Selecione uma imagem para postar');
       return;
@@ -123,15 +124,46 @@ class CreatePostNotifier extends StateNotifier<CreatePostState> {
     try {
       state = state.copyWith(isLoading: true, error: null);
 
+      // Verificar se o usuário está autenticado
+      final authState = ref.read(authProvider);
+      if (!authState.isAuthenticated) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Usuário não autenticado. Faça login novamente.',
+        );
+        return;
+      }
+
+      print('DEBUG: Iniciando criação do post...');
+      print('DEBUG: Usuário autenticado: ${authState.authUser?.id}');
+      print('DEBUG: Tamanho da imagem: ${state.selectedImageBytes!.length} bytes');
+      print('DEBUG: Legenda: ${state.caption.trim()}');
+
       await ref.read(postProvider.notifier).createPostWithImageBytes(
         imageBytes: state.selectedImageBytes!,
         caption: state.caption.trim(),
         location: state.location?.trim(),
       );
 
+      print('DEBUG: Post criado com sucesso!');
+
       // Limpar estado após sucesso
       state = const CreatePostState();
+      
+      // Mostrar mensagem de sucesso e fechar a tela
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Post criado com sucesso!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+      
     } catch (e) {
+      print('DEBUG: Erro ao criar post: $e');
       state = state.copyWith(
         isLoading: false,
         error: 'Erro ao criar post: $e',
@@ -175,7 +207,7 @@ class CreatePostScreen extends ConsumerWidget {
           TextButton(
             onPressed: state.isLoading || state.selectedImageBytes == null
                 ? null
-                : () => notifier.createPost(ref),
+                : () => notifier.createPost(ref, context),
             child: Text(
               'Compartilhar',
               style: TextStyle(
