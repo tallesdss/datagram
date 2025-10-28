@@ -178,7 +178,7 @@ class CreatePostScreen extends ConsumerWidget {
               'Compartilhar',
               style: TextStyle(
                 color: state.isLoading || state.selectedImage == null
-                    ? AppTheme.textColor.withOpacity(0.5)
+                    ? AppTheme.textColor.withValues(alpha: 0.5)
                     : AppTheme.primaryColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -252,7 +252,7 @@ class CreatePostScreen extends ConsumerWidget {
                 Icon(
                   Icons.add_photo_alternate_outlined,
                   size: 64,
-                  color: AppTheme.textColor.withOpacity(0.5),
+                  color: AppTheme.textColor.withValues(alpha: 0.5),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -260,7 +260,7 @@ class CreatePostScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.textColor.withOpacity(0.7),
+                    color: AppTheme.textColor.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -268,7 +268,7 @@ class CreatePostScreen extends ConsumerWidget {
                   'Escolha uma foto da galeria ou tire uma nova',
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppTheme.textColor.withOpacity(0.5),
+                    color: AppTheme.textColor.withValues(alpha: 0.5),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -345,7 +345,7 @@ class CreatePostScreen extends ConsumerWidget {
             decoration: InputDecoration(
               hintText: 'Escreva uma legenda...',
               hintStyle: TextStyle(
-                color: AppTheme.textColor.withOpacity(0.5),
+                color: AppTheme.textColor.withValues(alpha: 0.5),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -383,11 +383,11 @@ class CreatePostScreen extends ConsumerWidget {
             decoration: InputDecoration(
               hintText: 'Adicionar localização...',
               hintStyle: TextStyle(
-                color: AppTheme.textColor.withOpacity(0.5),
+                color: AppTheme.textColor.withValues(alpha: 0.5),
               ),
               prefixIcon: Icon(
                 Icons.location_on_outlined,
-                color: AppTheme.textColor.withOpacity(0.5),
+                color: AppTheme.textColor.withValues(alpha: 0.5),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -415,9 +415,9 @@ class CreatePostScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.withOpacity(0.3)),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
