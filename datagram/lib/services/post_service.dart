@@ -67,7 +67,6 @@ class PostService {
     final imagePath = 'posts/$userId/$timestamp';
     final imageUrl = await _storageService.uploadImageBytes(
       imageBytes: imageBytes,
-      bucket: 'posts',
       path: imagePath,
     );
     
@@ -154,7 +153,6 @@ class PostService {
       if (imagePath != null) {
         // Deletar a imagem do storage
         await _storageService.deleteImage(
-          bucket: 'posts',
           path: imagePath,
         );
       }

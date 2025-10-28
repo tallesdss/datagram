@@ -22,7 +22,6 @@ class StoryService {
     final mediaPath = 'stories/$userId/$timestamp';
     final mediaUrl = await _storageService.uploadImage(
       image: mediaFile,
-      bucket: 'stories',
       path: mediaPath,
     );
     
@@ -145,7 +144,6 @@ class StoryService {
         if (mediaPath != null) {
           try {
             await _storageService.deleteImage(
-              bucket: 'stories',
               path: mediaPath,
             );
           } catch (e) {

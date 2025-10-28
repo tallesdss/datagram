@@ -86,6 +86,29 @@ class StorageService {
     final fileName = '$path$fileExtension';
     final fullPath = '$userId/$fileName';
     
+    // Determinar content-type baseado na extensão
+    String contentType;
+    switch (fileExtension) {
+      case 'jpg':
+      case 'jpeg':
+        contentType = 'image/jpeg';
+        break;
+      case 'png':
+        contentType = 'image/png';
+        break;
+      case 'gif':
+        contentType = 'image/gif';
+        break;
+      case 'mp4':
+        contentType = 'video/mp4';
+        break;
+      case 'mov':
+        contentType = 'video/quicktime';
+        break;
+      default:
+        contentType = 'application/octet-stream';
+    }
+    
     // Upload do arquivo
     await _client.storage.from(bucket).upload(
       fullPath,
@@ -93,6 +116,7 @@ class StorageService {
       fileOptions: FileOptions(
         cacheControl: '3600',
         upsert: true,
+        contentType: contentType,
       ),
     );
     
@@ -128,6 +152,7 @@ class StorageService {
       fileOptions: FileOptions(
         cacheControl: '3600',
         upsert: true,
+        contentType: 'image/jpeg',
       ),
     );
     
