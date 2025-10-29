@@ -24,28 +24,46 @@ import '../../providers/providers.dart';
 // Provider para o router
 final routerProvider = Provider<GoRouter>((ref) {
   // Observar o estado de autenticação para redirecionamento
-  final authState = ref.watch(authProvider);
+  // Usar watch com tratamento de erro
+  AuthState authState;
+  try {
+    authState = ref.watch(authProvider);
+  } catch (e) {
+    // Se houver erro ao buscar o estado de autenticação, assumir não autenticado
+    authState = AuthState.unauthenticated();
+  }
   
   return GoRouter(
     initialLocation: '/onboarding',
     redirect: (context, state) {
-      // Verificar se o usuário está autenticado
-      final isAuth = authState.isAuthenticated;
-      final isAuthRoute = state.matchedLocation == '/login' || 
-                          state.matchedLocation == '/register' || 
-                          state.matchedLocation == '/forgot-password' ||
-                          state.matchedLocation == '/onboarding';
-      
-      // Se não estiver autenticado e não estiver em uma rota de autenticação,
-      // redirecionar para a tela de login
-      if (!isAuth && !isAuthRoute) {
+      try {
+        // Verificar se o usuário está autenticado
+        final isAuth = authState.isAuthenticated;
+        final isAuthRoute = state.matchedLocation == '/login' || 
+                            state.matchedLocation == '/register' || 
+                            state.matchedLocation == '/forgot-password' ||
+                            state.matchedLocation == '/onboarding';
+        
+        // Se o estado estiver carregando, não redirecionar ainda
+        if (authState.isLoading) {
+          return null;
+        }
+        
+        // Se não estiver autenticado e não estiver em uma rota de autenticação,
+        // redirecionar para a tela de login
+        if (!isAuth && !isAuthRoute) {
+          return '/login';
+        }
+        
+        // Se estiver autenticado e estiver em uma rota de autenticação,
+        // redirecionar para a tela inicial
+        if (isAuth && isAuthRoute) {
+          return '/home';
+        }
+      } catch (e) {
+        // Em caso de erro, redirecionar para login
+        debugPrint('Erro no redirect: $e');
         return '/login';
-      }
-      
-      // Se estiver autenticado e estiver em uma rota de autenticação,
-      // redirecionar para a tela inicial
-      if (isAuth && isAuthRoute) {
-        return '/home';
       }
       
       // Caso contrário, não redirecionar
@@ -160,15 +178,15 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 // Shell com bottom navigation
-class MainShell extends StatelessWidget {
+class MainShell extends ConsumerWidget {
   final Widget child;
 
   const MainShell({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: _buildAppBar(context),
+      appBar: _buildAppBar(context, ref),
       body: child,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -206,7 +224,7 @@ class MainShell extends StatelessWidget {
   }
 
   // AppBar personalizada para cada tela
-  PreferredSizeWidget? _buildAppBar(BuildContext context) {
+  PreferredSizeWidget? _buildAppBar(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).uri.path;
     
     // Não mostrar AppBar nas telas que já têm sua própria AppBar
@@ -233,35 +251,44 @@ class MainShell extends StatelessWidget {
                     context.push('/activity');
                   },
                 ),
-                Consumer(
-                  builder: (context, ref, _) {
-                    final unreadNotifications = ref.watch(unreadNotificationsProvider);
-                    if (unreadNotifications > 0) {
-                      return Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          child: Text(
-                            '$unreadNotifications',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
+                Builder(
+                  builder: (context) {
+                    try {
+                      final unreadNotifications = ref.watch(unreadNotificationsProvider);
+                      if (unreadNotifications > 0) {
+                        return Stack(
+                          children: [
+                            const SizedBox.shrink(),
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Text(
+                                  '$unreadNotifications',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      );
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    } catch (e) {
+                      return const SizedBox.shrink();
                     }
-                    return const SizedBox.shrink();
                   },
                 ),
               ],

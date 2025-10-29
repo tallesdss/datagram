@@ -43,15 +43,27 @@ class _DatagramAppState extends ConsumerState<DatagramApp> {
     super.initState();
     
     // Adicionar listener para mudanças no estado de autenticação do Supabase
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final AuthChangeEvent event = data.event;
-      
-      // Atualizar o estado de autenticação quando houver mudanças
-      if (event == AuthChangeEvent.signedIn || 
-          event == AuthChangeEvent.signedOut ||
-          event == AuthChangeEvent.userUpdated) {
-        // Forçar o provider a atualizar o estado
-        ref.invalidate(authProvider);
+    // Usar WidgetsBinding para garantir que o widget está montado
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+          if (!mounted) return;
+          
+          final AuthChangeEvent event = data.event;
+          
+          // Atualizar o estado de autenticação quando houver mudanças
+          if (event == AuthChangeEvent.signedIn || 
+              event == AuthChangeEvent.signedOut ||
+              event == AuthChangeEvent.userUpdated) {
+            // Forçar o provider a atualizar o estado
+            if (mounted) {
+              ref.invalidate(authProvider);
+            }
+          }
+        });
+      } catch (e) {
+        // Ignorar erros de listener se o Supabase não estiver inicializado
+        debugPrint('Erro ao configurar listener de auth: $e');
       }
     });
   }
